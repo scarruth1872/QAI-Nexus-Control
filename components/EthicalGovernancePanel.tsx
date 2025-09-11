@@ -2,9 +2,10 @@
 import React, { useState } from 'react';
 // FIX: Corrected import paths to be relative.
 import { ShieldIcon, AlertIcon } from './Icons';
-import { SystemStatus, EthicalAnalysis } from '../types';
+import { SystemStatus, EthicalAnalysis, XaiAnalysisResult } from '../types';
 import { Spinner } from './Spinner';
-import { runEthicalDilemmaAnalysis } from '../services/geminiService';
+import { runEthicalDilemmaAnalysis, runXaiAnalysis } from '../services/geminiService';
+import { XaiModule } from './XaiModule';
 
 interface EthicalGovernancePanelProps {
     alignmentStatus: SystemStatus['alignmentStatus'];
@@ -44,6 +45,8 @@ export const EthicalGovernancePanel: React.FC<EthicalGovernancePanelProps> = ({ 
     const [dilemma, setDilemma] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<EthicalAnalysis | null>(null);
+    const [xaiResult, setXaiResult] = useState<XaiAnalysisResult | null>(null);
+    const [isXaiLoading, setIsXaiLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -59,6 +62,20 @@ export const EthicalGovernancePanel: React.FC<EthicalGovernancePanelProps> = ({ 
             setIsLoading(false);
         }
     };
+
+    const handleRunXaiAnalysis = async () => {
+        setIsXaiLoading(true);
+        setXaiResult(null);
+        try {
+            const res = await runXaiAnalysis();
+            setXaiResult(res);
+        } catch (error) {
+            console.error("XAI analysis failed:", error);
+        } finally {
+            setIsXaiLoading(false);
+        }
+    };
+
 
     return (
         <div className="animate-fade-in-up">
@@ -95,7 +112,13 @@ export const EthicalGovernancePanel: React.FC<EthicalGovernancePanelProps> = ({ 
                     ))}
                 </div>
 
-                 <div>
+                <XaiModule
+                    onInitiate={handleRunXaiAnalysis}
+                    result={xaiResult}
+                    isLoading={isXaiLoading}
+                />
+
+                 <div className="mt-8">
                     <h4 className="text-lg font-semibold text-indigo-300 border-b-2 border-indigo-500/30 pb-2 mb-4">Ethical Dilemma Simulation (CEREA)</h4>
                     <form onSubmit={handleSubmit}>
                          <textarea

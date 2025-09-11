@@ -1,8 +1,9 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Chat } from '@google/genai';
 // FIX: Corrected all import paths to be relative.
-import { AgentType, ProbeType, ChatMessage } from '../types';
+import { AgentType, ProbeType, ChatMessage, LoggedChatMessage } from '../types';
 import { probeAgentCognitiveFunction, createAgentChatSession } from '../services/geminiService';
 import { ScienceIcon, SocietyIcon, PlanetIcon, InductionIcon, ReasoningIcon, RecursionIcon, SendIcon } from './Icons';
 import { Spinner } from './Spinner';
@@ -24,7 +25,11 @@ const ProbeButton: React.FC<{ onClick: () => void, disabled: boolean, children: 
     </button>
 );
 
-export const AgentPanel: React.FC<{ agentType: AgentType, onProbe: (agentType: AgentType, probeType: ProbeType) => void }> = ({ agentType, onProbe }) => {
+export const AgentPanel: React.FC<{ 
+    agentType: AgentType, 
+    onProbe: (agentType: AgentType, probeType: ProbeType) => void,
+    onNewInteraction: (logEntry: LoggedChatMessage) => void,
+}> = ({ agentType, onProbe, onNewInteraction }) => {
   const [probeResponse, setProbeResponse] = useState('');
   const [isProbeLoading, setIsProbeLoading] = useState<ProbeType | null>(null);
 
@@ -72,15 +77,22 @@ export const AgentPanel: React.FC<{ agentType: AgentType, onProbe: (agentType: A
     const messageToSend = currentMessage;
     setCurrentMessage('');
     setIsChatLoading(true);
-    setChatHistory(prev => [...prev, { role: 'user', text: messageToSend }]);
+    
+    const userMessage: ChatMessage = { role: 'user', text: messageToSend };
+    setChatHistory(prev => [...prev, userMessage]);
+    onNewInteraction({ ...userMessage, agentType });
 
     try {
         const response = await chat.sendMessage({ message: messageToSend });
-        setChatHistory(prev => [...prev, { role: 'model', text: response.text }]);
+        const modelMessage: ChatMessage = { role: 'model', text: response.text };
+        setChatHistory(prev => [...prev, modelMessage]);
+        onNewInteraction({ ...modelMessage, agentType });
     } catch (error) {
         console.error('Chat error:', error);
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during chat.";
-        setChatHistory(prev => [...prev, { role: 'model', text: `Error: ${errorMessage}` }]);
+        const modelMessage: ChatMessage = { role: 'model', text: `Error: ${errorMessage}` };
+        setChatHistory(prev => [...prev, modelMessage]);
+        onNewInteraction({ ...modelMessage, agentType });
     } finally {
         setIsChatLoading(false);
     }

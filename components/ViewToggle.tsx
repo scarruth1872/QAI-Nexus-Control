@@ -1,4 +1,3 @@
-
 import React from 'react';
 // FIX: Corrected import path for types to be a relative path.
 import { View } from '../types';
@@ -16,6 +15,7 @@ export const ViewToggle: React.FC<ViewToggleProps> = ({ currentView, onViewChang
     { id: 'orchestrator', label: 'Orchestrator Chat' },
     { id: 'system', label: 'System Integrity' },
     { id: 'knowledge', label: 'Knowledge Core' },
+    { id: 'roadmap', label: 'Roadmap' },
   ];
 
   return (

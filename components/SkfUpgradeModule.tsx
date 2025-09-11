@@ -1,11 +1,12 @@
+// FIX: New component SkfUpgradeModule.
 import React from 'react';
-import { DraaUpgradeResult } from '../types';
+import { SkfUpgradeResult } from '../types';
 import { Spinner } from './Spinner';
-import { CpuIcon } from './Icons';
+import { BrainCircuitIcon } from './Icons';
 
-interface ResourceAllocatorUpgradeProps {
+interface SkfUpgradeModuleProps {
     onInitiate: () => void;
-    result: DraaUpgradeResult | null;
+    result: SkfUpgradeResult | null;
     isLoading: boolean;
 }
 
@@ -16,13 +17,13 @@ const ResultCard: React.FC<{ title: string; children: React.ReactNode }> = ({ ti
     </div>
 );
 
-export const ResourceAllocatorUpgrade: React.FC<ResourceAllocatorUpgradeProps> = ({ onInitiate, result, isLoading }) => {
+export const SkfUpgradeModule: React.FC<SkfUpgradeModuleProps> = ({ onInitiate, result, isLoading }) => {
     return (
         <div className="animate-fade-in-up bg-gray-800/50 border border-indigo-500/20 rounded-lg p-6 backdrop-blur-sm shadow-lg shadow-indigo-900/20">
             <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-indigo-300">Resource Allocator Upgrade</h3>
+                <h3 className="text-2xl font-bold text-indigo-300">Semantic Knowledge Fabric (SKF) Upgrade</h3>
                 <p className="mt-2 text-indigo-200/80 max-w-3xl mx-auto text-sm">
-                    Enhance the Dynamic Resource Allocation Agent (DRAA) with predictive modeling to anticipate computational demands and dynamically reallocate resources.
+                    Evolve the legacy knowledge base into the SKF for superior data synthesis, real-time ingestion, and advanced cross-domain inference.
                 </p>
             </div>
 
@@ -35,12 +36,12 @@ export const ResourceAllocatorUpgrade: React.FC<ResourceAllocatorUpgradeProps> =
                     {isLoading ? (
                         <>
                             <Spinner className="w-5 h-5 mr-2" />
-                            Upgrading DRAA...
+                            Synthesizing...
                         </>
                     ) : (
                         <>
-                            <CpuIcon className="w-5 h-5 mr-2" />
-                            Initiate DRAA Upgrade
+                            <BrainCircuitIcon className="w-5 h-5 mr-2" />
+                            Initiate SKF Upgrade
                         </>
                     )}
                 </button>
@@ -48,19 +49,16 @@ export const ResourceAllocatorUpgrade: React.FC<ResourceAllocatorUpgradeProps> =
             
             {result && !isLoading && (
                  <div className="space-y-3 animate-fade-in-up">
-                    <ResultCard title="Analysis of Current Logic">
-                        <p className="font-mono text-xs">{result.analysis}</p>
-                    </ResultCard>
-                    <ResultCard title="Upgrade Description">
-                        <p className="font-mono text-xs p-2 bg-black/30 rounded-md border border-indigo-500/10">{result.upgradeDescription}</p>
+                    <ResultCard title="Upgrade Summary">
+                        <p className="font-mono text-xs">{result.upgradeSummary}</p>
                     </ResultCard>
                      <ResultCard title="New Capabilities">
                         <ul className="list-disc list-inside space-y-1 font-mono text-xs">
                             {result.newCapabilities.map((cap, i) => <li key={i}>{cap}</li>)}
                         </ul>
                     </ResultCard>
-                    <ResultCard title="Efficiency Impact">
-                        <p className="font-semibold text-green-400 text-xs">{result.efficiencyImpact}</p>
+                    <ResultCard title="Performance Impact">
+                        <p className="font-semibold text-green-400 text-xs">{result.performanceImpact}</p>
                     </ResultCard>
                  </div>
             )}

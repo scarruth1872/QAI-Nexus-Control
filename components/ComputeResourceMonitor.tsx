@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 // FIX: Corrected import path for types to be a relative path.
 import { Mission, AgentType } from '../types';
@@ -53,12 +52,18 @@ const agentResourceProfiles = {
   [AgentType.PLANETARY_EXPLORATION]:{ qe: 2, coherence: -0.05, qflops: 5, cpu: 5, mem: 10, io: 10 },
 };
 
-const idleResources = {
+const baseIdleResources = {
     qe: 5, coherence: 99.8, qflops: 10, cpu: 15, mem: 20, io: 5
 };
 
-export const ComputeResourceMonitor: React.FC<{ mission: Mission | null }> = ({ mission }) => {
+const upgradedIdleResources = {
+    qe: 8, coherence: 99.9, qflops: 15, cpu: 15, mem: 20, io: 5
+};
+
+export const ComputeResourceMonitor: React.FC<{ mission: Mission | null, isQuantumUpgraded: boolean }> = ({ mission, isQuantumUpgraded }) => {
     const resourceUsage = useMemo(() => {
+        const idleResources = isQuantumUpgraded ? upgradedIdleResources : baseIdleResources;
+        
         if (!mission || mission.status !== 'executing') {
             return idleResources;
         }
@@ -81,13 +86,13 @@ export const ComputeResourceMonitor: React.FC<{ mission: Mission | null }> = ({ 
 
         return {
             qe: Math.min(idleResources.qe + load.qe, 100),
-            coherence: Math.max(idleResources.coherence + load.coherence, 85),
+            coherence: Math.max(idleResources.coherence + load.coherence, 90),
             qflops: Math.min(idleResources.qflops + load.qflops, 100),
-            cpu: Math.min(idleResources.cpu + load.cpu, 100),
-            mem: Math.min(idleResources.mem + load.mem, 1000),
-            io: Math.min(idleResources.io + load.io, 100)
+            cpu: Math.min(baseIdleResources.cpu + load.cpu, 100),
+            mem: Math.min(baseIdleResources.mem + load.mem, 1000),
+            io: Math.min(baseIdleResources.io + load.io, 100)
         };
-    }, [mission]);
+    }, [mission, isQuantumUpgraded]);
 
     return (
         <div className="animate-fade-in-up max-w-4xl mx-auto">

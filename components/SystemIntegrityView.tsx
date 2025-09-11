@@ -1,13 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
-import { Mission, SystemStatus, DGMOptimization, OrchestrationLogEntry, LogEntryType, ResilienceAnalysis } from '../types';
+import { Mission, SystemStatus, DraaUpgradeResult, QuantumRefinementResult, OrchestrationLogEntry, LogEntryType, ResilienceAnalysis, SelfEvolvingAlgorithmResult, QuantumSecurityUpgradeResult, NeuromorphicIntegrationResult } from '../types';
 import { SystemStatusDashboard } from './SystemStatusDashboard';
 import { ComputeResourceMonitor } from './ComputeResourceMonitor';
 import { OrchestrationMonitor } from './OrchestrationMonitor';
 import { EthicalGovernancePanel } from './EthicalGovernancePanel';
-import { DgmPanel } from './DgmPanel';
+import { ResourceAllocatorUpgrade } from './DgmPanel'; // DgmPanel was repurposed
+import { QuantumCoreTuning } from './QuantumCoreTuning';
 import { ResilienceModule } from './ResilienceModule';
-import { runSelfOptimization, runResilienceAnalysis } from '../services/geminiService';
+import { SelfEvolvingFramework } from './SelfEvolvingFramework';
+import { QuantumSecurityModule } from './QuantumSecurityModule';
+import { NeuromorphicProcessorModule } from './NeuromorphicProcessorModule';
+import { runDraaUpgrade, runQuantumRefinement, runResilienceAnalysis, runSelfEvolvingFramework, runQuantumSecurityUpgrade, runNeuromorphicIntegration } from '../services/geminiService';
 
 // This is a simplified mock. In a real app, this would come from a backend service.
 const generateSystemStatus = (mission: Mission | null): SystemStatus => {
@@ -54,11 +57,22 @@ const generateLogEntry = (mission: Mission | null): OrchestrationLogEntry | null
 
 export const SystemIntegrityView: React.FC<{ mission: Mission | null }> = ({ mission }) => {
     const [status, setStatus] = useState<SystemStatus>(generateSystemStatus(null));
-    const [dgmResult, setDgmResult] = useState<DGMOptimization | null>(null);
-    const [isDgmLoading, setIsDgmLoading] = useState(false);
+    const [draaResult, setDraaResult] = useState<DraaUpgradeResult | null>(null);
+    const [isDraaLoading, setIsDraaLoading] = useState(false);
+    const [quantumResult, setQuantumResult] = useState<QuantumRefinementResult | null>(null);
+    const [isQuantumLoading, setIsQuantumLoading] = useState(false);
+    const [isQuantumUpgraded, setIsQuantumUpgraded] = useState(false);
     const [resilienceResult, setResilienceResult] = useState<ResilienceAnalysis | null>(null);
     const [isResilienceLoading, setIsResilienceLoading] = useState(false);
     const [orchestrationLog, setOrchestrationLog] = useState<OrchestrationLogEntry[]>([]);
+    
+    // Phase 3 States
+    const [selfEvolvingResult, setSelfEvolvingResult] = useState<SelfEvolvingAlgorithmResult | null>(null);
+    const [isSelfEvolvingLoading, setIsSelfEvolvingLoading] = useState(false);
+    const [securityResult, setSecurityResult] = useState<QuantumSecurityUpgradeResult | null>(null);
+    const [isSecurityLoading, setIsSecurityLoading] = useState(false);
+    const [neuromorphicResult, setNeuromorphicResult] = useState<NeuromorphicIntegrationResult | null>(null);
+    const [isNeuromorphicLoading, setIsNeuromorphicLoading] = useState(false);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -71,16 +85,30 @@ export const SystemIntegrityView: React.FC<{ mission: Mission | null }> = ({ mis
         return () => clearInterval(interval);
     }, [mission]);
 
-    const handleInitiateDgm = async () => {
-        setIsDgmLoading(true);
-        setDgmResult(null);
+    const handleInitiateDraa = async () => {
+        setIsDraaLoading(true);
+        setDraaResult(null);
         try {
-            const result = await runSelfOptimization();
-            setDgmResult(result);
+            const result = await runDraaUpgrade();
+            setDraaResult(result);
         } catch (error) {
-            console.error("DGM cycle failed:", error);
+            console.error("DRAA Upgrade failed:", error);
         } finally {
-            setIsDgmLoading(false);
+            setIsDraaLoading(false);
+        }
+    };
+
+    const handleInitiateQuantumRefinement = async () => {
+        setIsQuantumLoading(true);
+        setQuantumResult(null);
+        try {
+            const result = await runQuantumRefinement();
+            setQuantumResult(result);
+            setIsQuantumUpgraded(true); // Set upgrade status on success
+        } catch (error) {
+            console.error("Quantum Refinement failed:", error);
+        } finally {
+            setIsQuantumLoading(false);
         }
     };
 
@@ -97,16 +125,77 @@ export const SystemIntegrityView: React.FC<{ mission: Mission | null }> = ({ mis
         }
     };
 
+    // --- Phase 3 Handlers ---
+    const handleInitiateSelfEvolving = async () => {
+        setIsSelfEvolvingLoading(true);
+        setSelfEvolvingResult(null);
+        try {
+            const result = await runSelfEvolvingFramework();
+            setSelfEvolvingResult(result);
+        } catch (error) {
+            console.error("Self-Evolving Framework failed:", error);
+        } finally {
+            setIsSelfEvolvingLoading(false);
+        }
+    };
+
+    const handleInitiateSecurityUpgrade = async () => {
+        setIsSecurityLoading(true);
+        setSecurityResult(null);
+        try {
+            const result = await runQuantumSecurityUpgrade();
+            setSecurityResult(result);
+        } catch (error) {
+            console.error("Quantum Security Upgrade failed:", error);
+        } finally {
+            setIsSecurityLoading(false);
+        }
+    };
+
+    const handleInitiateNeuromorphic = async () => {
+        setIsNeuromorphicLoading(true);
+        setNeuromorphicResult(null);
+        try {
+            const result = await runNeuromorphicIntegration();
+            setNeuromorphicResult(result);
+        } catch (error) {
+            console.error("Neuromorphic Integration failed:", error);
+        } finally {
+            setIsNeuromorphicLoading(false);
+        }
+    };
+
     return (
         <div className="space-y-12">
             <SystemStatusDashboard status={status} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <ComputeResourceMonitor mission={mission} />
-                <EthicalGovernancePanel alignmentStatus={status.alignmentStatus} />
+            <ComputeResourceMonitor mission={mission} isQuantumUpgraded={isQuantumUpgraded} />
+            
+            <div className="text-center">
+                <h2 className="text-2xl font-bold text-indigo-300 tracking-wider">Phase 1 Strategic Upgrades</h2>
+                <div className="w-24 h-0.5 bg-indigo-500 mx-auto mt-2"></div>
             </div>
-             <OrchestrationMonitor log={orchestrationLog} />
-             <ResilienceModule onInitiate={handleInitiateResilienceScan} result={resilienceResult} isLoading={isResilienceLoading} />
-            <DgmPanel onInitiate={handleInitiateDgm} result={dgmResult} isLoading={isDgmLoading} />
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                 <QuantumCoreTuning onInitiate={handleInitiateQuantumRefinement} result={quantumResult} isLoading={isQuantumLoading} />
+                 <ResourceAllocatorUpgrade onInitiate={handleInitiateDraa} result={draaResult} isLoading={isDraaLoading} />
+            </div>
+
+            <EthicalGovernancePanel alignmentStatus={status.alignmentStatus} />
+            <OrchestrationMonitor log={orchestrationLog} />
+            <ResilienceModule onInitiate={handleInitiateResilienceScan} result={resilienceResult} isLoading={isResilienceLoading} />
+            
+            <div className="text-center">
+                <h2 className="text-2xl font-bold text-rose-300 tracking-wider">Phase 3 Strategic Upgrades</h2>
+                <div className="w-24 h-0.5 bg-rose-500 mx-auto mt-2"></div>
+            </div>
+
+            <div className="space-y-12">
+                <SelfEvolvingFramework onInitiate={handleInitiateSelfEvolving} result={selfEvolvingResult} isLoading={isSelfEvolvingLoading} />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <QuantumSecurityModule onInitiate={handleInitiateSecurityUpgrade} result={securityResult} isLoading={isSecurityLoading} />
+                    <NeuromorphicProcessorModule onInitiate={handleInitiateNeuromorphic} result={neuromorphicResult} isLoading={isNeuromorphicLoading} />
+                </div>
+            </div>
         </div>
     );
 };

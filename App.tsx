@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { MissionInput } from './components/MissionInput';
@@ -9,6 +8,7 @@ import { OrchestratorChat } from './components/OrchestratorChat';
 import { KnowledgeCore } from './components/KnowledgeCore';
 import { SystemIntegrityView } from './components/SystemIntegrityView';
 import { FinalReport } from './components/FinalReport';
+import { StrategicRoadmap } from './components/StrategicRoadmap';
 import { generateMissionPlan, executeTacticalStep, generateFinalReport } from './services/geminiService';
 import { Mission, View, AgentType, ProbeType, TacticalStep, Agent } from './types';
 
@@ -136,6 +136,8 @@ const App: React.FC = () => {
           return <SystemIntegrityView mission={mission}/>;
       case 'knowledge':
           return <KnowledgeCore />;
+      case 'roadmap':
+          return <StrategicRoadmap />;
       default:
         return <MissionInput onSubmit={handleMissionSubmit} isLoading={isLoading} />;
     }
