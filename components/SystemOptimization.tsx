@@ -5,7 +5,8 @@ import { DGMOptimization } from '../types';
 import { Spinner } from './Spinner';
 import { OptimizationIcon } from './Icons';
 
-interface DgmPanelProps {
+// FIX: Renamed props interface to match new component name
+interface SystemOptimizationProps {
     onInitiate: () => void;
     result: DGMOptimization | null;
     isLoading: boolean;
@@ -18,7 +19,8 @@ const ResultCard: React.FC<{ title: string; children: React.ReactNode }> = ({ ti
     </div>
 );
 
-export const DgmPanel: React.FC<DgmPanelProps> = ({ onInitiate, result, isLoading }) => {
+// FIX: Renamed component from DgmPanel to SystemOptimization to match usage in StrategicRoadmap
+export const SystemOptimization: React.FC<SystemOptimizationProps> = ({ onInitiate, result, isLoading }) => {
     return (
         <div className="animate-fade-in-up">
             <div className="text-center mb-10">
