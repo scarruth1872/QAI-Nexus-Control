@@ -1,29 +1,115 @@
-
 import React from 'react';
 
-const createIcon = (path: React.ReactNode): React.FC<React.SVGProps<SVGSVGElement>> => 
-  (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
-      {path}
+const iconProps = {
+  'aria-hidden': true as const,
+  focusable: false,
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.5,
+  viewBox: '0 0 24 24',
+};
+
+export const NexusIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg {...iconProps} {...props} strokeWidth={1}>
+    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+  </svg>
+);
+
+export const ScienceIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg {...iconProps} {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 10.25l-1.5 1.5-1.5-1.5M12 6.75v6M12 21a8.25 8.25 0 000-16.5 8.25 8.25 0 000 16.5z" />
+  </svg>
+);
+
+export const SocietyIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg {...iconProps} {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m-7.5-2.928A3 3 0 017.5 12.5m3 3a3 3 0 01-3-3m-3.75 4.615a9.094 9.094 0 01-3.741-.479 3 3 0 014.682-2.72m7.5-2.928a3 3 0 00-3-3m3 3a3 3 0 00-3-3m-9.75 1.5a9.094 9.094 0 013.741-.479 3 3 0 01-4.682-2.72m7.5-2.928a3 3 0 017.5 12.5m-7.5 0a3 3 0 01-7.5 0" />
+  </svg>
+);
+
+export const PlanetIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg {...iconProps} {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12.75 3.03v.568c0 .334.148.65.405.864l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664l.143.258a1.107 1.107 0 001.664.57l.143-.048a2.25 2.25 0 011.161.886l.51.766c.319.48.126 1.121-.216 1.49l-1.068.89a1.125 1.125 0 01-.405.864v.568m-6 0v-.568c0-.334-.148-.65-.405-.864l-1.068-.89c-.442-.369-.535-1.01-.216-1.49l.51-.766a2.25 2.25 0 011.161-.886l.143-.048a1.107 1.107 0 00.57-1.664l-.143-.258a1.107 1.107 0 00-1.664-.57l-.143.048a2.25 2.25 0 01-1.161-.886l-.51-.766c-.319-.48-.126-1.121.216-1.49l1.068-.89a1.125 1.125 0 01.405-.864v-.568m0 0a2.25 2.25 0 012.25 2.25h1.5A2.25 2.25 0 0112 3.03zm0 0v.01M6.75 3.03a2.25 2.25 0 00-2.25 2.25h-1.5A2.25 2.25 0 006 3.03zm0 0v.01" />
+  </svg>
+);
+
+export const LightbulbIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg {...iconProps} {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.184m-1.5.184a6.01 6.01 0 01-1.5-.184m3.75 7.484a6.75 6.75 0 01-7.5 0m7.5 0a6.75 6.75 0 00-7.5 0m7.5 0c-.392 0-.784-.028-1.175-.082m-4.65 0A6.75 6.75 0 0112 18.75m0 0v-5.25m0 0a6.01 6.01 0 001.5-.184m-1.5.184a6.01 6.01 0 01-1.5-.184m0 0a3.002 3.002 0 01-3-3m3 3a3.002 3.002 0 003-3m-3-3a3.002 3.002 0 01-3-3m3 3a3.002 3.002 0 003-3m0 0a3.75 3.75 0 013.75 3.75v.082m-3.75-.082a3.75 3.75 0 00-3.75 3.75v.082" />
+  </svg>
+);
+
+// FIX: Added missing ScaleIcon for System Optimization module
+export const ScaleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg {...iconProps} {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991-2.696a8.25 8.25 0 010 11.667l-3.181 3.183a8.25 8.25 0 01-11.667 0l-3.181-3.183a8.25 8.25 0 010-11.667l3.181-3.183L8.486 5.486a8.25 8.25 0 0111.667 0l3.181 3.183" />
     </svg>
 );
 
-export const NexusIcon = createIcon(<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5zM12 14.47L4.94 11 12 7.53 19.06 11 12 14.47z"/>);
-export const ScienceIcon = createIcon(<path fillRule="evenodd" d="M14.25 2.25a.75.75 0 0 0-1.5 0v1.551a8.96 8.96 0 0 0-1.5 0V2.25a.75.75 0 0 0-1.5 0v1.551a8.96 8.96 0 0 0-1.5 0V2.25a.75.75 0 0 0-1.5 0v1.551a8.956 8.956 0 0 0-1.12.503l-1.03-1.03a.75.75 0 0 0-1.06 1.06l1.03 1.03c-.294.395-.548.82-.756 1.274l-1.423-.474a.75.75 0 1 0-.5 1.408l1.423.474c-.16.42-.292.853-.39 1.299l-1.61.054a.75.75 0 0 0 0 1.5l1.61.054c.098.446.23.879.39 1.299l-1.423.474a.75.75 0 1 0 .5 1.408l1.423-.474c.208.455.462.88.756 1.274l-1.03 1.03a.75.75 0 1 0 1.06 1.06l1.03-1.03c.33.203.682.378 1.047.522A8.958 8.958 0 0 0 8.25 20.25v1.5a.75.75 0 0 0 1.5 0v-1.5a8.958 8.958 0 0 0 1.5 0v1.5a.75.75 0 0 0 1.5 0v-1.5a8.958 8.958 0 0 0 1.5 0v1.5a.75.75 0 0 0 1.5 0v-1.5a8.96 8.96 0 0 0 1.5 0v1.5a.75.75 0 0 0 1.5 0v-1.551a8.957 8.957 0 0 0 1.12-.503l1.03 1.03a.75.75 0 1 0 1.06-1.06l-1.03-1.03c.294-.395.548-.82.756-1.274l1.423.474a.75.75 0 1 0 .5-1.408l-1.423-.474c.16-.42.292-.853.39-1.299l1.61-.054a.75.75 0 0 0 0-1.5l-1.61-.054a8.96 8.96 0 0 0-.39-1.299l1.423-.474a.75.75 0 1 0-.5-1.408l-1.423.474a8.957 8.957 0 0 0-.756-1.274l1.03-1.03a.75.75 0 1 0-1.06-1.06l-1.03 1.03a8.957 8.957 0 0 0-1.12-.503V2.25a.75.75 0 0 0-1.5 0v1.551a8.96 8.96 0 0 0-1.5 0V2.25ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clipRule="evenodd" />);
-export const SocietyIcon = createIcon(<path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>);
-export const PlanetIcon = createIcon(<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-3.54 13.03c-2.09-2.09-2.09-5.48 0-7.57s5.48-2.09 7.57 0c2.09 2.09 2.09 5.48 0 7.57-2.09 2.09-5.48 2.09-7.57 0z" />);
-export const LightbulbIcon = createIcon(<path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/>);
-export const InductionIcon = createIcon(<path d="M4 18h16v-2H4v2zm0-5h16v-2H4v2zm0-5h16V6H4v2z"/>);
-export const ReasoningIcon = createIcon(<path d="M11.5 2C6.81 2 3 5.81 3 10.5S6.81 19 11.5 19h.5v3l4.75-3.51c2.02-1.49 3.25-3.79 3.25-6.49C20 5.81 16.19 2 11.5 2z"/>);
-export const RecursionIcon = createIcon(<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>);
-export const SendIcon = createIcon(<path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>);
-export const AlertIcon = createIcon(<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>);
-export const OptimizationIcon = createIcon(<path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>);
-export const CpuIcon = createIcon(<path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM9 18H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8-4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zM9 8H7V6h2v2zm4 0h-2V6h2v2zm4 0h-2V6h2v2z"/>);
-export const QuantumCircuitIcon = createIcon(<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>);
-export const BrainCircuitIcon = createIcon(<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM9.5 11h-2v2h2v-2zm2 2h2v-2h-2v2zm2-2h-2V9h2v2zm-2-2h2V7h-2v2zm-2 2h-2V9h2v2zm2-2h-2V7h2v2zm-4-2H7.5v2h2V9zm-2 2h2v2h-2v-2zm8 0h2v2h-2v-2zm2-2h-2V9h2v2zm-2-2h2V7h-2v2z"/>);
-export const ShieldIcon = createIcon(<path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>);
-export const CubeIcon = createIcon(<path d="M21 16.5c0 .83-.34 1.58-.88 2.12L12 23l-8.12-4.38A2.99 2.99 0 013 16.5V7.51c0-.83.34-1.58.88-2.12L12 1l8.12 4.39c.54.54.88 1.29.88 2.12v8.99zM12 3.32L5.06 7.51 12 11.69l6.94-4.18L12 3.32zM4.5 9.1v6.79l7.5 4.02v-6.95L4.5 9.1zm9 10.81V12.9l7.5-4.02v6.8l-7.5 4.03z"/>);
-export const ShieldCheckIcon = createIcon(<path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 15l-3.5-3.5 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>);
-export const CheckCircleIcon = createIcon(<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>);
-export const LockClosedIcon = createIcon(<path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>);
+export const CpuIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg {...iconProps} {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 9.563C9 9.252 9.252 9 9.563 9h4.874c.311 0 .563.252.563.563v4.874c0 .311-.252.563-.563.563H9.563C9.252 15 9 14.748 9 14.437V9.564z" />
+  </svg>
+);
+
+export const QuantumCircuitIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg {...iconProps} {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+export const BrainCircuitIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg {...iconProps} {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.same 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.572L16.5 21.75l-.398-1.178a3.375 3.375 0 00-2.455-2.456L12.75 18l1.178-.398a3.375 3.375 0 002.455-2.456L16.5 14.25l.398 1.178a3.375 3.375 0 002.456 2.456l1.178.398-1.178.398a3.375 3.375 0 00-2.456 2.456z" />
+    </svg>
+);
+
+export const AlertIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg {...iconProps} {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
+  </svg>
+);
+
+export const ShieldIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg {...iconProps} {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286zm0 13.036h.008v.008h-.008v-.008z" />
+  </svg>
+);
+
+export const ShieldCheckIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg {...iconProps} {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286zm0 13.036h.008v.008h-.008v-.008z" />
+    </svg>
+);
+
+export const CheckCircleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg {...iconProps} {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+);
+
+export const CubeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg {...iconProps} {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9.75l-9-5.25M9 12.75L3 16.5m6-3.75l6 3.75m-6-3.75V21m6-12v9" />
+    </svg>
+);
+
+export const OptimizationIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg {...iconProps} {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+    </svg>
+);
+
+export const RecursionIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg {...iconProps} {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.092 1.209-.138 2.43-.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9.75l-3.75 3.75-3.75-3.75" />
+    </svg>
+);
+
+export const LockClosedIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg {...iconProps} {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+);

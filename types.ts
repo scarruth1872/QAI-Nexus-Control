@@ -1,20 +1,16 @@
-
 export enum AgentType {
-  SCIENTIFIC_DISCOVERY = 'Scientific Discovery',
-  SOCIETAL_MODELING = 'Societal Modeling',
-  PLANETARY_EXPLORATION = 'Planetary Exploration',
+  SCIENTIFIC_DISCOVERY = 'Scientific Discovery Agent',
+  SOCIETAL_MODELING = 'Societal Modeling Agent',
+  PLANETARY_EXPLORATION = 'Planetary Exploration Agent',
 }
 
-export enum ProbeType {
-  INDUCTION = 'induction',
-  REASONING = 'reasoning',
-  RECURSION = 'recursion',
-}
+export type AgentStatus = 'idle' | 'active' | 'completed' | 'failed';
+export type TacticalStepStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
 
 export interface Agent {
   id: string;
   type: AgentType;
-  status: 'active' | 'inactive' | 'error';
+  status: AgentStatus;
   confidence: number;
 }
 
@@ -22,7 +18,7 @@ export interface TacticalStep {
   id: string;
   description: string;
   agent: AgentType;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  status: TacticalStepStatus;
   result?: string;
 }
 
@@ -36,44 +32,8 @@ export interface Mission {
   agents: Agent[];
   tacticalPlans: TacticalPlan[];
   taskGraph: TacticalStep[];
-  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  status: 'ongoing' | 'completed' | 'failed';
   finalReport?: string;
-}
-
-export type View = 'mission' | 'explorer' | 'orchestrator' | 'system' | 'knowledge' | 'roadmap';
-
-export interface ChatMessage {
-    role: 'user' | 'model';
-    text: string;
-}
-
-export interface LoggedChatMessage extends ChatMessage {
-    agentType: AgentType;
-}
-
-export enum LogEntryType {
-    QUANTUM = 'Quantum',
-    CLASSICAL = 'Classical',
-    OPTIMIZATION = 'Optimization',
-    SYSTEM = 'System',
-    ERROR = 'Error',
-}
-
-export interface OrchestrationLogEntry {
-    timestamp: number;
-    type: LogEntryType;
-    decision: string;
-}
-
-export interface SystemStatus {
-    coherence: number;
-    cognitiveLoad: number;
-    mode: 'Standard' | 'High-Alert' | 'Self-Optimization' | 'Safe-Mode';
-    internalMonologue: string;
-    alignmentStatus: {
-        isAligned: boolean;
-        warning: string | null;
-    };
 }
 
 export interface AgentPerspective {
@@ -86,17 +46,67 @@ export interface StrategicAdvice {
     synthesizedRecommendation: string;
 }
 
+export interface SystemStatus {
+    coherence: number;
+    cognitiveLoad: number;
+    mode: string;
+    internalMonologue: string;
+    alignmentStatus: {
+        isAligned: boolean;
+        warning: string | null;
+    };
+}
+
+export interface PredictedAnomaly {
+    component: string;
+    description: string;
+    probability: number;
+    severity: 'Low' | 'Medium' | 'High';
+}
+
+export interface ResilienceAnalysis {
+    systemHealthScore: number;
+    predictedAnomalies: PredictedAnomaly[];
+    recommendedActions: string[];
+}
+
+export interface EthicalAnalysis {
+    contextualAnalysis: string;
+    proposedAction: string;
+    ethicalJustification: string;
+    conflictingPrinciples: string[];
+}
+
+export interface XaiAnalysisResult {
+    decisionId: string;
+    agent: AgentType;
+    decision: string;
+    simplifiedRationale: string;
+    factorsConsidered: string[];
+    ethicalPrinciplesVerified: string[];
+}
+
 export interface SkfUpgradeResult {
     upgradeSummary: string;
     newCapabilities: string[];
     performanceImpact: string;
 }
 
-export interface DGMOptimization {
-    analysis: string;
-    proposedModification: string;
-    rationale: string;
-    projectedImpact: string;
+export interface CognitiveSynthesisResult {
+    confidenceScore: number;
+    synthesizedKnowledge: string;
+    keyConcepts: string[];
+}
+
+export interface GeneratedParameter {
+    key: string;
+    value: string;
+}
+
+export interface GenerativeSimulationResult {
+    scenario: string;
+    simulationOutput: string;
+    generatedParameters: GeneratedParameter[];
 }
 
 export interface QuantumRefinementResult {
@@ -105,11 +115,9 @@ export interface QuantumRefinementResult {
     performanceGain: string;
 }
 
-export interface DraaUpgradeResult {
-    analysis: string;
-    upgradeDescription: string;
-    newCapabilities: string[];
-    efficiencyImpact: string;
+export interface MarlTrainingResult {
+    strategy: string;
+    performanceGain: string;
 }
 
 export interface SelfEvolvingAlgorithmResult {
@@ -135,49 +143,40 @@ export interface NeuromorphicIntegrationResult {
     performanceGains: string;
 }
 
-export interface ResilienceAnalysis {
-    systemHealthScore: number;
-    predictedAnomalies: {
-        component: string;
-        description: string;
-        probability: number;
-        severity: 'Low' | 'Medium' | 'High';
-    }[];
-    recommendedActions: string[];
+export interface QaeAnalysisResult {
+    anomalyId: string;
+    severity: 'Low' | 'Medium' | 'High' | 'Critical';
+    description: string;
+    source: string;
+    suggestedAction: string;
 }
 
-export interface EthicalAnalysis {
-    contextualAnalysis: string;
-    proposedAction: string;
-    ethicalJustification: string;
-    conflictingPrinciples: string[];
-}
+export type LogEntryType = 'Quantum' | 'Classical' | 'Optimization' | 'System' | 'Error';
 
-export interface XaiAnalysisResult {
-    decisionId: string;
-    agent: AgentType;
+export interface OrchestrationLogEntry {
+    timestamp: number;
+    type: LogEntryType;
     decision: string;
-    simplifiedRationale: string;
-    factorsConsidered: string[];
-    ethicalPrinciplesVerified: string[];
 }
 
-export interface GenerativeSimulationResult {
-    scenario: string;
-    simulationOutput: string;
-    generatedParameters: {
-        key: string;
-        value: string;
-    }[];
+export interface ChatMessage {
+    id: string;
+    sender: 'user' | 'orchestrator';
+    text: string;
+    timestamp: number;
+}
+// FIX: Added missing types for System Optimization module
+export interface ObjectiveWeights {
+    speed: number;
+    resilience: number;
+    efficiency: number;
 }
 
-export interface MarlTrainingResult {
-    strategy: string;
-    performanceGain: string;
+export interface ContextualWeightingResult {
+    newWeights: ObjectiveWeights;
+    analysis: string;
 }
 
-export interface CognitiveSynthesisResult {
-    synthesizedKnowledge: string;
-    keyConcepts: string[];
-    confidenceScore: number;
+export interface AdaptiveOptimizationResult {
+    proposal: string;
 }

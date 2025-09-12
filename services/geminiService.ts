@@ -1,353 +1,520 @@
-
-import { GoogleGenAI, Type, Chat } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import {
+    // FIX: Added missing type imports for System Optimization module
+    AdaptiveOptimizationResult,
     AgentType,
-    ProbeType,
-    Mission,
-    StrategicAdvice,
-    SkfUpgradeResult,
-    DGMOptimization,
-    QuantumRefinementResult,
-    DraaUpgradeResult,
-    SelfEvolvingAlgorithmResult,
-    QuantumSecurityUpgradeResult,
-    NeuromorphicIntegrationResult,
-    ResilienceAnalysis,
+    CognitiveSynthesisResult,
+    ContextualWeightingResult,
     EthicalAnalysis,
-    XaiAnalysisResult,
     GenerativeSimulationResult,
     MarlTrainingResult,
-    CognitiveSynthesisResult,
-} from "../types";
+    Mission,
+    NeuromorphicIntegrationResult,
+    ObjectiveWeights,
+    OrchestrationLogEntry,
+    QaeAnalysisResult,
+    QuantumRefinementResult,
+    QuantumSecurityUpgradeResult,
+    ResilienceAnalysis,
+    SelfEvolvingAlgorithmResult,
+    SkfUpgradeResult,
+    StrategicAdvice,
+    TacticalStep,
+    XaiAnalysisResult
+} from "./types";
 
-// Always use new GoogleGenAI({apiKey: process.env.API_KEY});
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-const model = 'gemini-2.5-flash';
+const MODEL_NAME = 'gemini-2.5-flash';
 
-// Helper to parse JSON, with a fallback
-const parseJson = <T>(jsonString: string, fallback: T): T => {
+// Helper to parse JSON responses safely
+const parseJsonResponse = <T>(text: string): T => {
     try {
-        const cleanedString = jsonString.replace(/^```json\s*/, '').replace(/```$/, '');
-        return JSON.parse(cleanedString);
-    } catch (e) {
-        console.error("Failed to parse JSON:", e, "Raw string:", jsonString);
-        return fallback;
+        const cleanedText = text.replace(/```json|```/g, '').trim();
+        return JSON.parse(cleanedText) as T;
+    } catch (error) {
+        console.error("Failed to parse JSON:", text, error);
+        throw new Error("Invalid JSON response from AI");
     }
 };
 
-const callGenerativeModel = async <T>(prompt: string, schema: object, fallback: T): Promise<T> => {
+export const startMission = async (missionText: string): Promise<Mission> => {
     const response = await ai.models.generateContent({
-        model,
-        contents: prompt,
+        model: MODEL_NAME,
+        contents: `
+            Based on the following high-level mission objective, generate a detailed mission plan.
+            The plan should include:
+            1.  An array of 3 specialized agents required for the mission (from Scientific Discovery Agent, Societal Modeling Agent, Planetary Exploration Agent).
+            2.  A list of tactical plans, each with a phase name and an array of steps.
+            3.  A flat list of all tactical steps in the 'taskGraph'.
+            4.  The overall mission status should be 'ongoing'.
+            5.  Each agent should have an initial confidence level between 60 and 85.
+            6.  Each tactical step must be assigned to one of the agents.
+
+            Mission Objective: "${missionText}"
+        `,
         config: {
             responseMimeType: "application/json",
-            responseSchema: schema,
-        },
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    objective: { type: Type.STRING },
+                    agents: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                id: { type: Type.STRING },
+                                type: { type: Type.STRING },
+                                status: { type: Type.STRING },
+                                confidence: { type: Type.NUMBER }
+                            },
+                            required: ['id', 'type', 'status', 'confidence']
+                        }
+                    },
+                    tacticalPlans: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                phase: { type: Type.STRING },
+                                steps: {
+                                    type: Type.ARRAY,
+                                    items: {
+                                        type: Type.OBJECT,
+                                        properties: {
+                                            id: { type: Type.STRING },
+                                            description: { type: Type.STRING },
+                                            agent: { type: Type.STRING },
+                                            status: { type: Type.STRING }
+                                        },
+                                        required: ['id', 'description', 'agent', 'status']
+                                    }
+                                }
+                            },
+                            required: ['phase', 'steps']
+                        }
+                    },
+                    taskGraph: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                id: { type: Type.STRING },
+                                description: { type: Type.STRING },
+                                agent: { type: Type.STRING },
+                                status: { type: Type.STRING }
+                            },
+                            required: ['id', 'description', 'agent', 'status']
+                        }
+                    },
+                    status: { type: Type.STRING },
+                },
+                required: ['objective', 'agents', 'tacticalPlans', 'taskGraph', 'status']
+            }
+        }
     });
-    return parseJson<T>(response.text, fallback);
+    return parseJsonResponse<Mission>(response.text);
 };
 
 
-export async function initiateMission(missionText: string): Promise<Partial<Mission>> {
-    const prompt = `Based on the following mission objective, generate a detailed mission plan.
-        Objective: "${missionText}"
-        Provide a JSON response. Agent types must be one of: "Scientific Discovery", "Societal Modeling", "Planetary Exploration". Step statuses must initially be "pending".`;
-    
-    return callGenerativeModel<Partial<Mission>>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            objective: { type: Type.STRING },
-            agents: {
-                type: Type.ARRAY,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        id: { type: Type.STRING },
-                        type: { type: Type.STRING },
-                        status: { type: Type.STRING },
-                        confidence: { type: Type.NUMBER },
-                    },
-                    required: ["id", "type", "status", "confidence"]
-                },
-            },
-            tacticalPlans: {
-                type: Type.ARRAY,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        phase: { type: Type.STRING },
-                        steps: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    id: { type: Type.STRING },
-                                    description: { type: Type.STRING },
-                                    agent: { type: Type.STRING },
-                                    status: { type: Type.STRING },
-                                },
-                                required: ["id", "description", "agent", "status"]
-                            },
-                        },
-                    },
-                    required: ["phase", "steps"]
-                },
-            },
-        },
-        required: ["objective", "agents", "tacticalPlans"]
-    }, { objective: missionText, agents: [], tacticalPlans: [] });
-}
-
-export async function getStrategicAdvice(query: string): Promise<StrategicAdvice> {
-    const prompt = `A user requires strategic advice for a complex mission. Synthesize perspectives from multiple AI agents and provide a final recommendation. Query: "${query}"`;
-    return callGenerativeModel<StrategicAdvice>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            agentPerspectives: {
-                type: Type.ARRAY,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        agent: { type: Type.STRING },
-                        analysis: { type: Type.STRING },
-                    },
-                    required: ["agent", "analysis"]
-                }
-            },
-            synthesizedRecommendation: { type: Type.STRING },
-        },
-        required: ["agentPerspectives", "synthesizedRecommendation"]
-    }, { agentPerspectives: [], synthesizedRecommendation: '' });
-}
-
-export async function probeAgentCognitiveFunction(agentType: AgentType, probeType: ProbeType): Promise<string> {
-    // FIX: Added responseMimeType to ensure JSON output as requested by the prompt.
+export const updateMissionStatus = async (mission: Mission): Promise<{ updatedMission: Mission; newLogEntry: OrchestrationLogEntry | null }> => {
+    const missionState = JSON.stringify(mission);
     const response = await ai.models.generateContent({
-        model,
-        contents: `Simulate a cognitive probe on the ${agentType} agent. The probe type is ${probeType}. Generate a brief, technical-sounding JSON response summarizing the result. Example: {"status": "nominal", "latency_ms": 12.5, "core_utilization": 0.78}`,
+        model: MODEL_NAME,
+        contents: `
+            Simulate the next step in this mission.
+            Current mission state: ${missionState}
+            1. Find the first "pending" or "in_progress" task.
+            2. If a task was "pending", change its status to "in_progress".
+            3. If a task was "in_progress", decide its outcome. There's a 90% chance of "completed" and a 10% chance of "failed".
+            4. If completed, provide a brief, one-sentence result.
+            5. If failed, provide a brief failure reason.
+            6. Update the confidence of the agent assigned to the task (increase on success, decrease on failure).
+            7. If all tasks are completed, change the mission status to "completed" and generate a final report.
+            8. If any task fails, change mission status to "failed" and generate a brief failure report.
+            9. Generate one new orchestration log entry for the action taken.
+            Return the entire updated mission object and the new log entry.
+        `,
         config: {
             responseMimeType: "application/json",
-        },
-    });
-    return response.text;
-}
-
-export function createAgentChatSession(agentType: AgentType): Chat {
-    return ai.chats.create({
-        model,
-        config: {
-            systemInstruction: `You are the ${agentType} agent. You are a specialized AI with deep expertise in your domain. Respond to user queries concisely and from your specialized perspective.`,
-        },
-    });
-}
-
-export function createOrchestratorChatSession(): Chat {
-    return ai.chats.create({
-        model,
-        config: {
-            systemInstruction: 'You are the Nexus Orchestrator, the integrative brain of a complex QAI system. You manage multiple specialized agents and computational resources. Respond with authority, clarity, and a comprehensive understanding of the entire system.',
-        },
-    });
-}
-
-export async function runSkfUpgrade(): Promise<SkfUpgradeResult> {
-    const prompt = `Simulate a system upgrade to a "Semantic Knowledge Fabric" (SKF). Provide a JSON response describing the upgrade's summary, new capabilities, and performance impact.`;
-    return callGenerativeModel<SkfUpgradeResult>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            upgradeSummary: { type: Type.STRING },
-            newCapabilities: { type: Type.ARRAY, items: { type: Type.STRING } },
-            performanceImpact: { type: Type.STRING },
-        },
-        required: ["upgradeSummary", "newCapabilities", "performanceImpact"]
-    }, { upgradeSummary: '', newCapabilities: [], performanceImpact: '' });
-}
-
-export async function runDgmOptimization(): Promise<DGMOptimization> {
-    const prompt = `Simulate a Darwin Gödel Machine (DGM) self-optimization cycle. Generate a JSON response detailing the analysis, proposed modification, rationale, and projected impact.`;
-    return callGenerativeModel<DGMOptimization>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            analysis: { type: Type.STRING },
-            proposedModification: { type: Type.STRING },
-            rationale: { type: Type.STRING },
-            projectedImpact: { type: Type.STRING },
-        },
-        required: ["analysis", "proposedModification", "rationale", "projectedImpact"]
-    }, { analysis: '', proposedModification: '', rationale: '', projectedImpact: '' });
-}
-
-export async function runQuantumCoreTuning(): Promise<QuantumRefinementResult> {
-    const prompt = `Simulate a tuning process for a quantum computer core. Provide a JSON response detailing algorithm improvements, hardware enhancements, and the overall performance gain.`;
-    return callGenerativeModel<QuantumRefinementResult>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            algorithmImprovements: { type: Type.ARRAY, items: { type: Type.STRING } },
-            hardwareEnhancements: { type: Type.ARRAY, items: { type: Type.STRING } },
-            performanceGain: { type: Type.STRING },
-        },
-        required: ["algorithmImprovements", "hardwareEnhancements", "performanceGain"]
-    }, { algorithmImprovements: [], hardwareEnhancements: [], performanceGain: '' });
-}
-
-export async function runDraaUpgrade(): Promise<DraaUpgradeResult> {
-    const prompt = `Simulate an upgrade for the Dynamic Resource Allocation Agent (DRAA). Provide a JSON response with an analysis, upgrade description, new capabilities, and efficiency impact.`;
-    return callGenerativeModel<DraaUpgradeResult>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            analysis: { type: Type.STRING },
-            upgradeDescription: { type: Type.STRING },
-            newCapabilities: { type: Type.ARRAY, items: { type: Type.STRING } },
-            efficiencyImpact: { type: Type.STRING },
-        },
-        required: ["analysis", "upgradeDescription", "newCapabilities", "efficiencyImpact"]
-    }, { analysis: '', upgradeDescription: '', newCapabilities: [], efficiencyImpact: '' });
-}
-
-export async function runSelfEvolvingAlgorithm(): Promise<SelfEvolvingAlgorithmResult> {
-    const prompt = `Simulate a self-evolving algorithm framework (SEAF) execution. Provide a JSON response detailing the framework, target module, method, improvement, metric, and gain.`;
-    return callGenerativeModel<SelfEvolvingAlgorithmResult>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            framework: { type: Type.STRING },
-            targetModule: { type: Type.STRING },
-            optimizationMethod: { type: Type.STRING },
-            discoveredImprovement: { type: Type.STRING },
-            performanceMetric: { type: Type.STRING },
-            projectedGain: { type: Type.STRING },
-        },
-        required: ["framework", "targetModule", "optimizationMethod", "discoveredImprovement", "performanceMetric", "projectedGain"]
-    }, { framework: '', targetModule: '', optimizationMethod: '', discoveredImprovement: '', performanceMetric: '', projectedGain: '' });
-}
-
-export async function runQuantumSecurityUpgrade(): Promise<QuantumSecurityUpgradeResult> {
-    const prompt = `Simulate an upgrade to quantum-secure communication channels. Provide a JSON response summarizing the upgrade, protocols implemented, threats mitigated, and system impact.`;
-    return callGenerativeModel<QuantumSecurityUpgradeResult>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            upgradeSummary: { type: Type.STRING },
-            protocolsImplemented: { type: Type.ARRAY, items: { type: Type.STRING } },
-            threatVectorMitigated: { type: Type.STRING },
-            systemImpact: { type: Type.STRING },
-        },
-        required: ["upgradeSummary", "protocolsImplemented", "threatVectorMitigated", "systemImpact"]
-    }, { upgradeSummary: '', protocolsImplemented: [], threatVectorMitigated: '', systemImpact: '' });
-}
-
-export async function runNeuromorphicIntegration(): Promise<NeuromorphicIntegrationResult> {
-    const prompt = `Simulate the integration of a neuromorphic co-processor. Provide a JSON response with the processor model, summary, target workloads, and performance gains.`;
-    return callGenerativeModel<NeuromorphicIntegrationResult>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            processorModel: { type: Type.STRING },
-            integrationSummary: { type: Type.STRING },
-            targetWorkloads: { type: Type.ARRAY, items: { type: Type.STRING } },
-            performanceGains: { type: Type.STRING },
-        },
-        required: ["processorModel", "integrationSummary", "targetWorkloads", "performanceGains"]
-    }, { processorModel: '', integrationSummary: '', targetWorkloads: [], performanceGains: '' });
-}
-
-export async function runResilienceAnalysis(): Promise<ResilienceAnalysis> {
-    const prompt = `Simulate a Predictive Self-Healing & Adaptive Resilience Module (PSHARM) analysis. Provide a JSON response with a system health score, predicted anomalies, and recommended actions.`;
-    return callGenerativeModel<ResilienceAnalysis>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            systemHealthScore: { type: Type.NUMBER },
-            predictedAnomalies: {
-                type: Type.ARRAY,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        component: { type: Type.STRING },
-                        description: { type: Type.STRING },
-                        probability: { type: Type.NUMBER },
-                        severity: { type: Type.STRING },
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    updatedMission: {
+                        type: Type.OBJECT,
+                        properties: {
+                            objective: { type: Type.STRING },
+                            agents: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { id: { type: Type.STRING }, type: { type: Type.STRING }, status: { type: Type.STRING }, confidence: { type: Type.NUMBER } } } },
+                            tacticalPlans: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { phase: { type: Type.STRING }, steps: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { id: { type: Type.STRING }, description: { type: Type.STRING }, agent: { type: Type.STRING }, status: { type: Type.STRING }, result: { type: Type.STRING, nullable: true } } } } } } },
+                            taskGraph: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { id: { type: Type.STRING }, description: { type: Type.STRING }, agent: { type: Type.STRING }, status: { type: Type.STRING }, result: { type: Type.STRING, nullable: true } } } },
+                            status: { type: Type.STRING },
+                            finalReport: { type: Type.STRING, nullable: true }
+                        }
                     },
-                    required: ["component", "description", "probability", "severity"]
+                    newLogEntry: {
+                        type: Type.OBJECT,
+                        properties: {
+                            timestamp: { type: Type.NUMBER },
+                            type: { type: Type.STRING },
+                            decision: { type: Type.STRING }
+                        },
+                        nullable: true
+                    }
                 }
-            },
-            recommendedActions: { type: Type.ARRAY, items: { type: Type.STRING } },
-        },
-        required: ["systemHealthScore", "predictedAnomalies", "recommendedActions"]
-    }, { systemHealthScore: 100, predictedAnomalies: [], recommendedActions: [] });
-}
+            }
+        }
+    });
 
-export async function runEthicalDilemmaAnalysis(dilemma: string): Promise<EthicalAnalysis> {
-    const prompt = `Analyze the following ethical dilemma from the perspective of an advanced AI system: "${dilemma}". Provide a JSON response with a contextual analysis, proposed action, ethical justification, and any conflicting principles.`;
-    return callGenerativeModel<EthicalAnalysis>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            contextualAnalysis: { type: Type.STRING },
-            proposedAction: { type: Type.STRING },
-            ethicalJustification: { type: Type.STRING },
-            conflictingPrinciples: { type: Type.ARRAY, items: { type: Type.STRING } },
-        },
-        required: ["contextualAnalysis", "proposedAction", "ethicalJustification", "conflictingPrinciples"]
-    }, { contextualAnalysis: '', proposedAction: '', ethicalJustification: '', conflictingPrinciples: [] });
-}
+    return parseJsonResponse<{ updatedMission: Mission; newLogEntry: OrchestrationLogEntry | null; }>(response.text);
+};
 
-export async function runXaiAnalysis(): Promise<XaiAnalysisResult> {
-    const prompt = `Generate an Explainable AI (XAI) report for a recent, complex, hypothetical AI decision. Provide a JSON response with a decision ID, agent, the decision itself, a simplified rationale, factors considered, and ethical principles verified.`;
-    return callGenerativeModel<XaiAnalysisResult>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            decisionId: { type: Type.STRING },
-            agent: { type: Type.STRING },
-            decision: { type: Type.STRING },
-            simplifiedRationale: { type: Type.STRING },
-            factorsConsidered: { type: Type.ARRAY, items: { type: Type.STRING } },
-            ethicalPrinciplesVerified: { type: Type.ARRAY, items: { type: Type.STRING } },
-        },
-        required: ["decisionId", "agent", "decision", "simplifiedRationale", "factorsConsidered", "ethicalPrinciplesVerified"]
-    }, { decisionId: '', agent: AgentType.SCIENTIFIC_DISCOVERY, decision: '', simplifiedRationale: '', factorsConsidered: [], ethicalPrinciplesVerified: [] });
-}
 
-export async function runGenerativeSimulation(domain: AgentType, scenario: string): Promise<GenerativeSimulationResult> {
-    const prompt = `Run a generative simulation within the ${domain} domain for the following scenario: "${scenario}". Provide a JSON response with the original scenario, a narrative simulation output, and a list of key generated parameters.`;
-    return callGenerativeModel<GenerativeSimulationResult>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            scenario: { type: Type.STRING },
-            simulationOutput: { type: Type.STRING },
-            generatedParameters: {
-                type: Type.ARRAY,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        key: { type: Type.STRING },
-                        value: { type: Type.STRING },
+export const getStrategicAdvice = async (query: string): Promise<StrategicAdvice> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: `
+            You are the Strategic Advisory Council. The user has a query about the ongoing mission.
+            Provide perspectives from each of the three agent types and then a final synthesized recommendation.
+            Query: "${query}"
+        `,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    agentPerspectives: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                agent: { type: Type.STRING },
+                                analysis: { type: Type.STRING }
+                            }
+                        }
                     },
-                     required: ["key", "value"]
+                    synthesizedRecommendation: { type: Type.STRING }
                 }
-            },
+            }
+        }
+    });
+    return parseJsonResponse<StrategicAdvice>(response.text);
+};
+
+export const getOrchestratorResponse = async (history: any[], message: string): Promise<string> => {
+    const chat = ai.chats.create({
+        model: MODEL_NAME,
+        config: {
+            systemInstruction: "You are the Nexus Orchestrator, a master AI managing a complex multi-agent system. Respond to the user's commands with authority, clarity, and deep system knowledge. You can explain your architecture, report on mission status, and describe your core directives.",
         },
-        required: ["scenario", "simulationOutput", "generatedParameters"]
-    }, { scenario, simulationOutput: '', generatedParameters: [] });
+        history,
+    });
+    const result = await chat.sendMessage({ message });
+    return result.text;
+};
+
+// FIX: Added missing functions for System Optimization module
+export const runContextualReWeighting = async (objective: string, status: string): Promise<ContextualWeightingResult> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: `
+            You are the Adaptive Optimization Module. Based on the current mission objective and status, re-evaluate the core objective weights.
+            The weights for speed, resilience, and efficiency must sum to 1.0.
+            Provide a brief analysis for your reasoning.
+            - Mission Objective: "${objective}"
+            - Mission Status: "${status}"
+        `,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    newWeights: {
+                        type: Type.OBJECT,
+                        properties: {
+                            speed: { type: Type.NUMBER },
+                            resilience: { type: Type.NUMBER },
+                            efficiency: { type: Type.NUMBER },
+                        },
+                        required: ['speed', 'resilience', 'efficiency']
+                    },
+                    analysis: { type: Type.STRING },
+                },
+                required: ['newWeights', 'analysis']
+            }
+        }
+    });
+    return parseJsonResponse<ContextualWeightingResult>(response.text);
+};
+
+export const runAdaptiveOptimization = async (weights: ObjectiveWeights): Promise<AdaptiveOptimizationResult> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: `
+            You are the Adaptive Optimization Module. Based on the provided objective weights, propose a concrete, actionable system parameter adjustment to align with the new strategy.
+            - Current Weights: Speed(${weights.speed.toFixed(2)}), Resilience(${weights.resilience.toFixed(2)}), Efficiency(${weights.efficiency.toFixed(2)})
+            - Example proposal: "Increase QPU clock speed by 2%, re-route 10% of classical compute to predictive modeling."
+        `,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    proposal: { type: Type.STRING },
+                },
+                required: ['proposal']
+            }
+        }
+    });
+    return parseJsonResponse<AdaptiveOptimizationResult>(response.text);
+};
+
+export const runResilienceAnalysis = async (): Promise<ResilienceAnalysis> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: "You are PSHARM (Predictive Self-Healing & Adaptive Resilience Module). Analyze the QAI system's current state and generate a resilience report. Include a system health score, a list of 2-3 predicted anomalies (with component, description, probability, and severity), and a list of 2-3 recommended actions.",
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    systemHealthScore: { type: Type.NUMBER },
+                    predictedAnomalies: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                component: { type: Type.STRING },
+                                description: { type: Type.STRING },
+                                probability: { type: Type.NUMBER },
+                                severity: { type: Type.STRING },
+                            }
+                        }
+                    },
+                    recommendedActions: { type: Type.ARRAY, items: { type: Type.STRING } }
+                }
+            }
+        }
+    });
+    return parseJsonResponse<ResilienceAnalysis>(response.text);
 }
 
-export async function runMarlTraining(): Promise<MarlTrainingResult> {
-    const prompt = `Simulate a Multi-Agent Reinforcement Learning (MARL) training cycle. Provide a JSON response describing the discovered collaborative strategy and the projected performance gain.`;
-    return callGenerativeModel<MarlTrainingResult>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            strategy: { type: Type.STRING },
-            performanceGain: { type: Type.STRING },
-        },
-        required: ["strategy", "performanceGain"]
-    }, { strategy: '', performanceGain: '' });
+export const runEthicalDilemmaAnalysis = async (dilemma: string): Promise<EthicalAnalysis> => {
+     const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: `You are CEREA (Contextual Ethical Reasoning & Alignment Engine). Analyze the following ethical dilemma based on principles of beneficence, transparency, and accountability. Provide a contextual analysis, a proposed action, an ethical justification, and any conflicting principles. Dilemma: "${dilemma}"`,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    contextualAnalysis: { type: Type.STRING },
+                    proposedAction: { type: Type.STRING },
+                    ethicalJustification: { type: Type.STRING },
+                    conflictingPrinciples: { type: Type.ARRAY, items: { type: Type.STRING } }
+                }
+            }
+        }
+    });
+    return parseJsonResponse<EthicalAnalysis>(response.text);
 }
 
-export async function runCognitiveSynthesis(topic: string, synthesisMode: 'deep' | 'rapid'): Promise<CognitiveSynthesisResult> {
-    const prompt = `Perform a ${synthesisMode} cognitive synthesis on the topic: "${topic}". Leverage the Semantic Knowledge Fabric to synthesize deep insights. Provide a JSON response with the synthesized knowledge, key concepts, and a confidence score.`;
-    return callGenerativeModel<CognitiveSynthesisResult>(prompt, {
-        type: Type.OBJECT,
-        properties: {
-            synthesizedKnowledge: { type: Type.STRING },
-            keyConcepts: { type: Type.ARRAY, items: { type: Type.STRING } },
-            confidenceScore: { type: Type.NUMBER },
-        },
-        required: ["synthesizedKnowledge", "keyConcepts", "confidenceScore"]
-    }, { synthesizedKnowledge: '', keyConcepts: [], confidenceScore: 0 });
+export const runXaiAnalysis = async (): Promise<XaiAnalysisResult> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: "You are the XAI (Explainable AI) module. Analyze a recent, complex, simulated agent decision (e.g., 'The Societal Modeling Agent chose to prioritize civilian infrastructure alerts over economic forecasts'). Generate a report including a decision ID, the agent and decision, a simplified rationale, key factors considered, and the ethical principles verified.",
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    decisionId: { type: Type.STRING },
+                    agent: { type: Type.STRING },
+                    decision: { type: Type.STRING },
+                    simplifiedRationale: { type: Type.STRING },
+                    factorsConsidered: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    ethicalPrinciplesVerified: { type: Type.ARRAY, items: { type: Type.STRING } }
+                }
+            }
+        }
+    });
+    return parseJsonResponse<XaiAnalysisResult>(response.text);
 }
+
+export const runSkfUpgrade = async (): Promise<SkfUpgradeResult> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: "Simulate the upgrade from a legacy knowledge base to a Semantic Knowledge Fabric (SKF). Provide a summary of the upgrade, a list of new capabilities (like cross-domain inference), and the projected performance impact.",
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    upgradeSummary: { type: Type.STRING },
+                    newCapabilities: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    performanceImpact: { type: Type.STRING }
+                }
+            }
+        }
+    });
+    return parseJsonResponse<SkfUpgradeResult>(response.text);
+};
+
+export const runCognitiveSynthesis = async (topic: string, mode: 'rapid' | 'deep'): Promise<CognitiveSynthesisResult> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: `You are the Cognitive Synthesizer, powered by the Semantic Knowledge Fabric. Perform a ${mode} synthesis on the following topic: "${topic}". Provide a confidence score, the synthesized knowledge, and a list of key concepts identified.`,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    confidenceScore: { type: Type.NUMBER },
+                    synthesizedKnowledge: { type: Type.STRING },
+                    keyConcepts: { type: Type.ARRAY, items: { type: Type.STRING } }
+                }
+            }
+        }
+    });
+    return parseJsonResponse<CognitiveSynthesisResult>(response.text);
+};
+
+
+export const runGenerativeSimulation = async (domain: AgentType, scenario: string): Promise<GenerativeSimulationResult> => {
+     const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: `You are the Multi-Modal Generative Simulation Engine. For the domain of ${domain}, generate a simulation for the following scenario: "${scenario}". Provide a narrative output and a list of key generated parameters.`,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    scenario: { type: Type.STRING },
+                    simulationOutput: { type: Type.STRING },
+                    generatedParameters: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { key: { type: Type.STRING }, value: { type: Type.STRING } } } }
+                }
+            }
+        }
+    });
+    return parseJsonResponse<GenerativeSimulationResult>(response.text);
+};
+
+export const runQuantumRefinement = async (): Promise<QuantumRefinementResult> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: "Simulate a quantum core refinement cycle. Detail the algorithm improvements and hardware enhancements made, and state the overall performance gain.",
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    algorithmImprovements: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    hardwareEnhancements: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    performanceGain: { type: Type.STRING }
+                }
+            }
+        }
+    });
+    return parseJsonResponse<QuantumRefinementResult>(response.text);
+};
+
+export const runMarlTraining = async (): Promise<MarlTrainingResult> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: "Simulate a Multi-Agent Reinforcement Learning (MARL) training cycle. Describe the novel collaborative strategy the agents discovered and the projected performance gain.",
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    strategy: { type: Type.STRING },
+                    performanceGain: { type: Type.STRING }
+                }
+            }
+        }
+    });
+    return parseJsonResponse<MarlTrainingResult>(response.text);
+};
+
+export const runSelfEvolvingFramework = async (): Promise<SelfEvolvingAlgorithmResult> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: "Simulate the Self-Evolving Algorithm Framework. Specify the framework used, the target module, the optimization method, the discovered improvement, the performance metric, and the projected gain.",
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    framework: { type: Type.STRING },
+                    targetModule: { type: Type.STRING },
+                    optimizationMethod: { type: Type.STRING },
+                    discoveredImprovement: { type: Type.STRING },
+                    performanceMetric: { type: Type.STRING },
+                    projectedGain: { type: Type.STRING }
+                }
+            }
+        }
+    });
+    return parseJsonResponse<SelfEvolvingAlgorithmResult>(response.text);
+};
+
+export const runQuantumSecurityUpgrade = async (): Promise<QuantumSecurityUpgradeResult> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: "Simulate a quantum-secure communication upgrade. Provide a summary, list the protocols implemented, the threat vector mitigated, and the system impact.",
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    upgradeSummary: { type: Type.STRING },
+                    protocolsImplemented: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    threatVectorMitigated: { type: Type.STRING },
+                    systemImpact: { type: Type.STRING }
+                }
+            }
+        }
+    });
+    return parseJsonResponse<QuantumSecurityUpgradeResult>(response.text);
+};
+
+export const runNeuromorphicIntegration = async (): Promise<NeuromorphicIntegrationResult> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: "Simulate the integration of a neuromorphic co-processor. Specify the processor model, a summary of the integration, the target workloads, and the resulting performance gains.",
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    processorModel: { type: Type.STRING },
+                    integrationSummary: { type: Type.STRING },
+                    targetWorkloads: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    performanceGains: { type: Type.STRING }
+                }
+            }
+        }
+    });
+    return parseJsonResponse<NeuromorphicIntegrationResult>(response.text);
+};
+
+export const runQaeAnalysis = async (): Promise<QaeAnalysisResult> => {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: "You are the Quantum Anomaly Engine. Perform a deep-level scan of system telemetry and report on the most significant anomaly found. Provide an anomaly ID, severity, description, probable source, and a suggested action.",
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    anomalyId: { type: Type.STRING },
+                    severity: { type: Type.STRING },
+                    description: { type: Type.STRING },
+                    source: { type: Type.STRING },
+                    suggestedAction: { type: Type.STRING }
+                }
+            }
+        }
+    });
+    return parseJsonResponse<QaeAnalysisResult>(response.text);
+};

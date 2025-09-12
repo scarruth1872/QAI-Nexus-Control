@@ -1,46 +1,29 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { AgentPanel } from './AgentPanel';
-import { AgentType, ProbeType, LoggedChatMessage } from '../types';
-import { InteractionLog } from './InteractionLog';
+import { Agent } from '../types';
 
-export const AgentExplorer: React.FC = () => {
-    const [interactionLog, setInteractionLog] = useState<LoggedChatMessage[]>([]);
+interface AgentExplorerProps {
+    agents: Agent[];
+}
 
-    const handleProbe = (agentType: AgentType, probeType: ProbeType) => {
-        console.log(`Probing ${agentType} with ${probeType}`);
-        // This is where you might add a log entry for the probe action itself
-    };
-
-    const handleNewInteraction = (logEntry: LoggedChatMessage) => {
-        setInteractionLog(prev => [...prev, logEntry]);
-    };
-
+export const AgentExplorer: React.FC<AgentExplorerProps> = ({ agents }) => {
     return (
         <div className="animate-fade-in-up">
             <div className="text-center mb-10">
-                <h2 className="text-3xl font-bold text-indigo-300">Cognitive Agent Explorer</h2>
+                <h2 className="text-3xl font-bold text-indigo-300">Agent Cognitive Explorer</h2>
                 <p className="mt-2 text-lg text-indigo-200/80 max-w-3xl mx-auto">
-                    Directly probe and interact with the core cognitive functions of each specialized agent.
+                    Deep dive into the operational parameters and cognitive state of each active agent.
                 </p>
             </div>
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <AgentPanel 
-                    agentType={AgentType.SCIENTIFIC_DISCOVERY} 
-                    onProbe={handleProbe}
-                    onNewInteraction={handleNewInteraction}
-                />
-                <AgentPanel 
-                    agentType={AgentType.SOCIETAL_MODELING}
-                    onProbe={handleProbe}
-                    onNewInteraction={handleNewInteraction}
-                />
-                <AgentPanel
-                    agentType={AgentType.PLANETARY_EXPLORATION}
-                    onProbe={handleProbe}
-                    onNewInteraction={handleNewInteraction}
-                />
-            </div>
-             <InteractionLog log={interactionLog} />
+            {agents.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {agents.map(agent => <AgentPanel key={agent.id} agent={agent} />)}
+                </div>
+            ) : (
+                <div className="text-center py-16 bg-gray-800/30 rounded-lg border border-indigo-500/20">
+                    <p className="text-indigo-300">No active mission. Deploy agents from Mission Control to begin.</p>
+                </div>
+            )}
         </div>
     );
 };

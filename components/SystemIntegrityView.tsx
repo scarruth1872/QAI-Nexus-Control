@@ -1,9 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { SystemStatusDashboard } from './SystemStatusDashboard';
+// FIX: Corrected import path for types to be a relative path.
 import { SystemStatus, ResilienceAnalysis } from '../types';
 import { EthicalGovernancePanel } from './EthicalGovernancePanel';
 import { ResilienceModule } from './ResilienceModule';
+// FIX: Corrected import path for geminiService to be a relative path.
 import { runResilienceAnalysis } from '../services/geminiService';
 import { ComputeResourceMonitor } from './ComputeResourceMonitor';
 

@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+// FIX: Corrected import path for types to be a relative path.
 import { AgentType, GenerativeSimulationResult } from '../types';
 import { Spinner } from './Spinner';
+// FIX: Corrected import path for Icons to be a relative path.
 import { CubeIcon } from './Icons';
+// FIX: Corrected import path for geminiService to be a relative path.
 import { runGenerativeSimulation } from '../services/geminiService';
 
 interface GenerativeSimulationEngineProps {

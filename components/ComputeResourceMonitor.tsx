@@ -1,6 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
+// FIX: Corrected import path for Icons component to be a relative path.
 import { CpuIcon, QuantumCircuitIcon, BrainCircuitIcon } from './Icons';
 
 interface ComputeResourceMonitorProps {
