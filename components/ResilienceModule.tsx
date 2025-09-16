@@ -14,7 +14,7 @@ interface ResilienceModuleProps {
     isUpgraded: boolean;
 }
 
-const severityClasses = {
+const severityClasses: { [key: string]: string } = {
     Low: 'border-cyan-500 text-cyan-300',
     Medium: 'border-amber-500 text-amber-300',
     High: 'border-rose-500 text-rose-300',
@@ -69,18 +69,21 @@ export const ResilienceModule: React.FC<ResilienceModuleProps> = ({ onInitiate, 
                     <div>
                         <h4 className="text-lg font-semibold text-cyan-300 mb-3">Predicted Anomalies</h4>
                         <div className="space-y-3">
-                            {result.predictedAnomalies.map((anomaly, index) => (
-                                <div key={index} className={`p-3 bg-black/30 rounded-md border-l-4 ${severityClasses[anomaly.severity]}`}>
+                            {result.predictedAnomalies.map((anomaly, index) => {
+                                const severityKey = anomaly.severity as keyof typeof severityClasses;
+                                const severityClass = severityClasses[severityKey] || severityClasses.Low;
+                                return (
+                                <div key={index} className={`p-3 bg-black/30 rounded-md border-l-4 ${severityClass}`}>
                                     <div className="flex justify-between items-center text-sm">
                                         <p className="font-semibold">{anomaly.component}</p>
                                         <div className="flex items-center space-x-4">
                                             <span>Probability: <span className="font-mono">{anomaly.probability.toFixed(2)}%</span></span>
-                                            <span className={`px-2 py-0.5 text-xs font-bold rounded-full bg-opacity-20 ${severityClasses[anomaly.severity].replace('border-', 'bg-').replace('text-cyan-300', 'text-cyan-200').replace('text-amber-300', 'text-amber-200').replace('text-rose-300', 'text-rose-200')}`}>{anomaly.severity}</span>
+                                            <span className={`px-2 py-0.5 text-xs font-bold rounded-full bg-opacity-20 ${severityClass.replace('border-', 'bg-').replace('text-cyan-300', 'text-cyan-200').replace('text-amber-300', 'text-amber-200').replace('text-rose-300', 'text-rose-200')}`}>{anomaly.severity}</span>
                                         </div>
                                     </div>
                                     <p className="text-xs text-gray-400 mt-1">{anomaly.description}</p>
                                 </div>
-                            ))}
+                            )})}
                         </div>
                     </div>
 

@@ -4,7 +4,7 @@ import { QaeAnalysisResult } from '../types';
 import { Spinner } from './Spinner';
 import { AlertIcon, QuantumCircuitIcon } from './Icons';
 
-const severityClasses = {
+const severityClasses: { [key: string]: string } = {
     Low: 'border-cyan-500 text-cyan-300',
     Medium: 'border-amber-500 text-amber-300',
     High: 'border-rose-500 text-rose-300',
@@ -26,6 +26,39 @@ export const QaeInterface: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const renderResult = () => {
+        if (!result) return null;
+        
+        const severityKey = result.severity as keyof typeof severityClasses;
+        const severityClass = severityClasses[severityKey] || severityClasses.Low;
+
+        return (
+            <div className={`mt-10 bg-gray-800/50 border rounded-lg p-6 backdrop-blur-sm shadow-2xl space-y-4 animate-fade-in-up ${severityClass.replace('text-', 'border-').replace(/-\d+$/, '-500/30')} shadow-cyan-500/10`}>
+                <div className="flex justify-between items-center">
+                    <h3 className={`text-xl font-bold ${severityClass}`}>{result.severity} Anomaly Detected</h3>
+                    <span className={`px-3 py-1 text-sm font-bold rounded-full bg-opacity-20 ${severityClass.replace('border-', 'bg-').replace(/-\d+$/, '-500/20')}`}>{result.severity} Severity</span>
+                </div>
+                <p className="text-xs text-gray-500 font-mono">ID: {result.anomalyId}</p>
+                
+                <div className="p-4 bg-black/30 rounded-lg">
+                    <h4 className="font-semibold text-gray-300 mb-2">Description</h4>
+                    <p className="text-sm text-gray-300">{result.description}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="p-4 bg-black/30 rounded-lg">
+                        <h4 className="font-semibold text-gray-300 mb-2">Probable Source</h4>
+                        <p className="text-sm text-gray-300 font-mono">{result.source}</p>
+                    </div>
+                    <div className="p-4 bg-green-900/20 rounded-lg border border-green-500/20">
+                        <h4 className="font-semibold text-green-300 mb-2">Suggested Action</h4>
+                        <p className="text-sm text-green-200">{result.suggestedAction}</p>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -57,31 +90,8 @@ export const QaeInterface: React.FC = () => {
                 </button>
             </div>
 
-            {result && !isLoading && (
-                <div className={`mt-10 bg-gray-800/50 border rounded-lg p-6 backdrop-blur-sm shadow-2xl space-y-4 animate-fade-in-up ${severityClasses[result.severity].replace('text-', 'border-').replace(/-\d+$/, '-500/30')} shadow-cyan-500/10`}>
-                    <div className="flex justify-between items-center">
-                        <h3 className={`text-xl font-bold ${severityClasses[result.severity]}`}>Anomaly Detected</h3>
-                        <span className={`px-3 py-1 text-sm font-bold rounded-full bg-opacity-20 ${severityClasses[result.severity].replace('border-', 'bg-').replace(/-\d+$/, '-500/20')}`}>{result.severity} Severity</span>
-                    </div>
-                    <p className="text-xs text-gray-500 font-mono">ID: {result.anomalyId}</p>
-                    
-                    <div className="p-4 bg-black/30 rounded-lg">
-                        <h4 className="font-semibold text-gray-300 mb-2">Description</h4>
-                        <p className="text-sm text-gray-300">{result.description}</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div className="p-4 bg-black/30 rounded-lg">
-                            <h4 className="font-semibold text-gray-300 mb-2">Probable Source</h4>
-                            <p className="text-sm text-gray-300 font-mono">{result.source}</p>
-                        </div>
-                        <div className="p-4 bg-green-900/20 rounded-lg border border-green-500/20">
-                            <h4 className="font-semibold text-green-300 mb-2">Suggested Action</h4>
-                            <p className="text-sm text-green-200">{result.suggestedAction}</p>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {result && !isLoading && renderResult()}
+            
              {!result && !isLoading && (
                 <div className="text-center py-16 bg-gray-800/30 rounded-lg border border-indigo-500/20">
                     <p className="text-indigo-300">System is nominal. Awaiting scan initiation.</p>
