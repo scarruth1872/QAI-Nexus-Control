@@ -4,8 +4,13 @@ import { MarlTrainingModule } from './MarlTrainingModule';
 import { SelfEvolvingFramework } from './SelfEvolvingFramework';
 import { QuantumSecurityModule } from './QuantumSecurityModule';
 import { NeuromorphicProcessorModule } from './NeuromorphicProcessorModule';
-import { QuantumCoreTuning } from './QuantumCoreTuning';
-import * as gemini from '../services/geminiService';
+import { 
+    runSkfUpgrade, 
+    runMarlTraining, 
+    runSelfEvolvingAlgorithm, 
+    runQuantumSecurityUpgrade, 
+    runNeuromorphicIntegration 
+} from '../services/geminiService';
 import { 
     SkfUpgradeResult, 
     MarlTrainingResult, 
@@ -19,63 +24,122 @@ interface StrategicRoadmapProps {
 }
 
 export const StrategicRoadmap: React.FC<StrategicRoadmapProps> = ({ onSkfUpgrade }) => {
-    const [skf, setSkf] = useState<{res: SkfUpgradeResult | null, loading: boolean, upgraded: boolean}>({res: null, loading: false, upgraded: false});
-    const [marl, setMarl] = useState<{res: MarlTrainingResult | null, loading: boolean, upgraded: boolean}>({res: null, loading: false, upgraded: false});
-    const [sef, setSef] = useState<{res: SelfEvolvingAlgorithmResult | null, loading: boolean, upgraded: boolean}>({res: null, loading: false, upgraded: false});
-    const [qsm, setQsm] = useState<{res: QuantumSecurityUpgradeResult | null, loading: boolean, upgraded: boolean}>({res: null, loading: false, upgraded: false});
-    const [npm, setNpm] = useState<{res: NeuromorphicIntegrationResult | null, loading: boolean, upgraded: boolean}>({res: null, loading: false, upgraded: false});
+    // SKF state
+    const [skfResult, setSkfResult] = useState<SkfUpgradeResult | null>(null);
+    const [isSkfLoading, setIsSkfLoading] = useState(false);
+    const [isSkfUpgraded, setIsSkfUpgraded] = useState(false);
 
-    const createHandler = <T,>(setter: React.Dispatch<React.SetStateAction<{res: T | null, loading: boolean, upgraded: boolean}>>, serviceCall: () => Promise<T>, onComplete?: () => void) => async () => {
-        setter(s => ({...s, loading: true, res: null}));
+    // MARL state
+    const [marlResult, setMarlResult] = useState<MarlTrainingResult | null>(null);
+    const [isMarlLoading, setIsMarlLoading] = useState(false);
+    const [isMarlUpgraded, setIsMarlUpgraded] = useState(false);
+
+    // Self-Evolving state
+    const [selfEvolvingResult, setSelfEvolvingResult] = useState<SelfEvolvingAlgorithmResult | null>(null);
+    const [isSelfEvolvingLoading, setIsSelfEvolvingLoading] = useState(false);
+    const [isSelfEvolvingUpgraded, setIsSelfEvolvingUpgraded] = useState(false);
+
+    // Quantum Security state
+    const [quantumSecurityResult, setQuantumSecurityResult] = useState<QuantumSecurityUpgradeResult | null>(null);
+    const [isQuantumSecurityLoading, setIsQuantumSecurityLoading] = useState(false);
+    const [isQuantumSecurityUpgraded, setIsQuantumSecurityUpgraded] = useState(false);
+    
+    // Neuromorphic state
+    const [neuromorphicResult, setNeuromorphicResult] = useState<NeuromorphicIntegrationResult | null>(null);
+    const [isNeuromorphicLoading, setIsNeuromorphicLoading] = useState(false);
+    const [isNeuromorphicUpgraded, setIsNeuromorphicUpgraded] = useState(false);
+
+
+    const handleSkfUpgrade = async () => {
+        setIsSkfLoading(true);
         try {
-            const res = await serviceCall();
-            setter({res, loading: false, upgraded: true});
-            if (onComplete) onComplete();
-        } catch (error) {
-            console.error("Upgrade failed:", error);
-            setter(s => ({...s, loading: false}));
-        }
+            const res = await runSkfUpgrade();
+            setSkfResult(res);
+            setIsSkfUpgraded(true);
+            onSkfUpgrade();
+        } catch (error) { console.error("SKF upgrade failed", error); }
+        finally { setIsSkfLoading(false); }
+    };
+    
+    const handleMarlTraining = async () => {
+        setIsMarlLoading(true);
+        try {
+            const res = await runMarlTraining();
+            setMarlResult(res);
+            setIsMarlUpgraded(true);
+        } catch (error) { console.error("MARL training failed", error); }
+        finally { setIsMarlLoading(false); }
     };
 
+    const handleSelfEvolving = async () => {
+        setIsSelfEvolvingLoading(true);
+        try {
+            const res = await runSelfEvolvingAlgorithm();
+            setSelfEvolvingResult(res);
+            setIsSelfEvolvingUpgraded(true);
+        } catch (error) { console.error("Self-evolving algorithm failed", error); }
+        finally { setIsSelfEvolvingLoading(false); }
+    };
+    
+    const handleQuantumSecurityUpgrade = async () => {
+        setIsQuantumSecurityLoading(true);
+        try {
+            const res = await runQuantumSecurityUpgrade();
+            setQuantumSecurityResult(res);
+            setIsQuantumSecurityUpgraded(true);
+        } catch (error) { console.error("Quantum Security upgrade failed", error); }
+        finally { setIsQuantumSecurityLoading(false); }
+    };
+    
+    const handleNeuromorphicIntegration = async () => {
+        setIsNeuromorphicLoading(true);
+        try {
+            const res = await runNeuromorphicIntegration();
+            setNeuromorphicResult(res);
+            setIsNeuromorphicUpgraded(true);
+        } catch (error) { console.error("Neuromorphic integration failed", error); }
+        finally { setIsNeuromorphicLoading(false); }
+    };
+
+
     return (
-        <div className="animate-fade-in-up">
+        <div className="animate-fade-in-up space-y-12">
             <div className="text-center mb-10">
-                <h2 className="text-3xl font-bold text-indigo-300">Strategic Roadmap</h2>
+                <h2 className="text-3xl font-bold text-indigo-300">Strategic Roadmap & System Evolution</h2>
                 <p className="mt-2 text-lg text-indigo-200/80 max-w-3xl mx-auto">
-                    Initiate next-generation upgrades to enhance system capabilities and performance across multiple domains.
+                    Initiate long-term strategic upgrades to evolve the core capabilities of the Nexus system.
                 </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <SkfUpgradeModule
-                    onInitiate={createHandler(setSkf, gemini.runSkfUpgrade, onSkfUpgrade)}
-                    result={skf.res}
-                    isLoading={skf.loading}
-                    isUpgraded={skf.upgraded}
+                <SkfUpgradeModule 
+                    onInitiate={handleSkfUpgrade} 
+                    result={skfResult} 
+                    isLoading={isSkfLoading} 
+                    isUpgraded={isSkfUpgraded} 
                 />
-                <QuantumCoreTuning />
                 <MarlTrainingModule
-                    onInitiate={createHandler(setMarl, gemini.runMarlTraining)}
-                    result={marl.res}
-                    isLoading={marl.loading}
-                    isUpgraded={marl.upgraded}
+                    onInitiate={handleMarlTraining}
+                    result={marlResult}
+                    isLoading={isMarlLoading}
+                    isUpgraded={isMarlUpgraded}
                 />
                 <SelfEvolvingFramework
-                    onInitiate={createHandler(setSef, gemini.runSelfEvolvingAlgorithm)}
-                    result={sef.res}
-                    isLoading={sef.loading}
-                    isUpgraded={sef.upgraded}
+                    onInitiate={handleSelfEvolving}
+                    result={selfEvolvingResult}
+                    isLoading={isSelfEvolvingLoading}
+                    isUpgraded={isSelfEvolvingUpgraded}
                 />
-                <QuantumSecurityModule
-                    onInitiate={createHandler(setQsm, gemini.runQuantumSecurityUpgrade)}
-                    result={qsm.res}
-                    isLoading={qsm.loading}
-                    isUpgraded={qsm.upgraded}
+                <QuantumSecurityModule 
+                    onInitiate={handleQuantumSecurityUpgrade}
+                    result={quantumSecurityResult}
+                    isLoading={isQuantumSecurityLoading}
+                    isUpgraded={isQuantumSecurityUpgraded}
                 />
-                <NeuromorphicProcessorModule
-                    onInitiate={createHandler(setNpm, gemini.runNeuromorphicIntegration)}
-                    result={npm.res}
-                    isLoading={npm.loading}
-                    isUpgraded={npm.upgraded}
+                <NeuromorphicProcessorModule 
+                    onInitiate={handleNeuromorphicIntegration}
+                    result={neuromorphicResult}
+                    isLoading={isNeuromorphicLoading}
+                    isUpgraded={isNeuromorphicUpgraded}
                 />
             </div>
         </div>

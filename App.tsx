@@ -1,190 +1,207 @@
-
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { MissionInput } from './components/MissionInput';
 import { Dashboard } from './components/Dashboard';
-import { FinalReport } from './components/FinalReport';
-import { View, ViewToggle } from './components/ViewToggle';
+import { ViewToggle, View } from './components/ViewToggle';
 import { AgentExplorer } from './components/AgentExplorer';
 import { SystemStatusDashboard } from './components/SystemStatusDashboard';
 import { SystemOptimization } from './components/SystemOptimization';
-import { Mission, MissionStatus, SystemStatus, TaskStatus, OrchestrationLogEntry } from './types';
-import { generateMissionPlan } from './services/geminiService';
 import { SystemIntegrityView } from './components/SystemIntegrityView';
-import { StrategicRoadmap } from './components/StrategicRoadmap';
 import { KnowledgeCore } from './components/KnowledgeCore';
+import { StrategicRoadmap } from './components/StrategicRoadmap';
 import { OrchestratorChat } from './components/OrchestratorChat';
 import { MissionArchive } from './components/MissionArchive';
 import { QaeInterface } from './components/QaeInterface';
 import { UnifiedFieldAssessment } from './components/UnifiedFieldAssessment';
-
+import { FinalReport } from './components/FinalReport';
+import { generateMissionPlan } from './services/geminiService';
+import { 
+    Mission, 
+    SystemStatus, 
+    TaskStatus,
+    AgentStatus,
+    OrchestrationLogEntry,
+    LogEntryType,
+} from './types';
 
 const App: React.FC = () => {
-  const [mission, setMission] = useState<Mission | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentView, setCurrentView] = useState<View>('Mission Control');
-  const [systemStatus, setSystemStatus] = useState<SystemStatus>({
-    coherence: 98.5,
-    cognitiveLoad: 22.3,
-    mode: 'STANDBY',
-    internalMonologue: 'System nominal. Awaiting directives.',
-    alignmentStatus: {
-      isAligned: true,
-      warning: null,
-    },
-  });
-   const [orchestrationLog, setOrchestrationLog] = useState<OrchestrationLogEntry[]>([]);
-   const [isSkfActive, setIsSkfActive] = useState(false);
+    const [mission, setMission] = useState<Mission | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [currentView, setCurrentView] = useState<View>('Mission Control');
+    const [systemStatus, setSystemStatus] = useState<SystemStatus>({
+        coherence: 100,
+        cognitiveLoad: 0,
+        mode: 'Supervised',
+        internalMonologue: 'System standby. Awaiting mission parameters.',
+        alignmentStatus: { isAligned: true, warning: null },
+    });
+    const [log, setLog] = useState<OrchestrationLogEntry[]>([]);
+    
+    const [isSkfActive, setIsSkfActive] = useState(false);
 
 
-  const addLog = (entry: Omit<OrchestrationLogEntry, 'timestamp'>) => {
-    setOrchestrationLog(prev => [...prev, { ...entry, timestamp: Date.now() }]);
-  };
+    const addLogEntry = (type: LogEntryType, decision: string) => {
+        setLog(prevLog => [...prevLog, { timestamp: Date.now(), type, decision }]);
+    };
+    
+    useEffect(() => {
+        if (!mission || mission.status !== 'active') return;
 
-  const handleMissionSubmit = async (missionText: string) => {
-    setIsLoading(true);
-    setMission(null);
-    setCurrentView('Mission Control');
-    setOrchestrationLog([]);
-    addLog({ type: 'System', decision: `Initializing new mission objective: ${missionText}` });
-    try {
-      const newMission = await generateMissionPlan(missionText);
-      setMission(newMission);
-      setSystemStatus(prev => ({ ...prev, mode: 'ACTIVE' }));
-      addLog({ type: 'System', decision: 'Mission plan generated. Deploying agents.' });
-    } catch (error) {
-      console.error("Failed to generate mission plan:", error);
-      // You might want to set an error state here to show in the UI
-      addLog({ type: 'Error', decision: 'Failed to generate mission plan.' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        const interval = setInterval(() => {
+            setMission(prevMission => {
+                if (!prevMission) return null;
 
-  useEffect(() => {
-    if (mission && mission.status === 'ongoing') {
-      const taskInterval = setInterval(() => {
-        setMission(prevMission => {
-          if (!prevMission || prevMission.status !== 'ongoing') {
-            clearInterval(taskInterval);
-            return prevMission;
-          }
+                const newSystemStatus: Partial<SystemStatus> = {};
+                let updated = false;
 
-          const newMission = { ...prevMission, taskGraph: [...prevMission.taskGraph.map(t => ({...t}))], agents: [...prevMission.agents.map(a => ({...a}))] };
-          
-          let nextTask = newMission.taskGraph.find(t => t.status === 'pending');
-          let currentTask = newMission.taskGraph.find(t => t.status === 'in_progress');
+                const nextPendingTaskIndex = prevMission.taskGraph.findIndex(t => t.status === 'pending');
+                
+                if (nextPendingTaskIndex === -1) {
+                    const allCompleted = prevMission.taskGraph.every(t => t.status === 'completed');
+                     if (allCompleted || prevMission.taskGraph.every(t => t.status === 'completed' || t.status === 'failed')) {
+                        clearInterval(interval);
+                        return { ...prevMission, status: allCompleted ? 'completed' : 'failed' };
+                    }
+                }
 
-          if(currentTask){
-             // Complete current task
-             const taskIndex = newMission.taskGraph.findIndex(t => t.id === currentTask!.id);
-             const isSuccess = Math.random() > 0.1; // 10% chance of failure
-             newMission.taskGraph[taskIndex].status = isSuccess ? 'completed' : 'failed';
-             newMission.taskGraph[taskIndex].result = isSuccess ? JSON.stringify({ data: "Sample output data", confidence: 0.95 }) : "Critical error during execution.";
-             
-             // Update agent confidence
-             const agentIndex = newMission.agents.findIndex(a => a.type === currentTask!.agent);
-             if (agentIndex !== -1) {
-                const confidenceChange = isSuccess ? Math.random() * 2 : -Math.random() * 5;
-                newMission.agents[agentIndex].confidence = Math.max(0, Math.min(100, newMission.agents[agentIndex].confidence + confidenceChange));
-             }
-            addLog({ type: 'Classical', decision: `Task ${currentTask.id} ${isSuccess ? 'completed' : 'failed'} by ${currentTask.agent}.` });
+                const currentInProgressCount = prevMission.taskGraph.filter(t => t.status === 'in_progress').length;
+                let taskToStart = -1;
+                if (currentInProgressCount < 2 && nextPendingTaskIndex !== -1) {
+                    taskToStart = nextPendingTaskIndex;
+                }
+                
+                let newAgents = [...prevMission.agents];
 
-          } else if (nextTask) {
-            // Start next task
-            const taskIndex = newMission.taskGraph.findIndex(t => t.id === nextTask!.id);
-            newMission.taskGraph[taskIndex].status = 'in_progress';
-            addLog({ type: 'Classical', decision: `Assigning task ${nextTask.id} to ${nextTask.agent}.` });
-          } else {
-             // All tasks are done
-             const failedTasks = newMission.taskGraph.filter(t => t.status === 'failed').length;
-             newMission.status = failedTasks > newMission.taskGraph.length / 3 ? 'failed' : 'completed';
-             setSystemStatus(prev => ({...prev, mode: 'STANDBY'}));
-             addLog({ type: 'System', decision: `Mission ${newMission.id} has concluded with status: ${newMission.status}.` });
-             clearInterval(taskInterval);
-          }
-          
-          return newMission;
-        });
+                const newTasks = [...prevMission.taskGraph].map((task, index) => {
+                    // Start a new task?
+                    if (index === taskToStart) {
+                        updated = true;
+                        addLogEntry('Classical', `Initiating task: "${task.description}" for ${task.agent}.`);
+                        newSystemStatus.internalMonologue = `Executing tactical step: ${task.description}`;
+                        
+                        const agentIndex = newAgents.findIndex(a => a.type === task.agent);
+                        if (agentIndex !== -1) {
+                            newAgents = newAgents.map((a, i) => i === agentIndex ? { ...a, status: 'active' as AgentStatus } : a);
+                        }
 
-         // Update system status periodically
-        setSystemStatus(prev => ({
-            ...prev,
-            coherence: Math.max(80, Math.min(99, prev.coherence + (Math.random() - 0.5) * 2)),
-            cognitiveLoad: Math.max(10, Math.min(90, prev.cognitiveLoad + (Math.random() - 0.5) * 5)),
-            internalMonologue: `Executing task... confidence levels fluctuating... monitoring agent performance.`
-        }));
+                        return { ...task, status: 'in_progress' as TaskStatus };
+                    }
+                    
+                    // Complete an in-progress task?
+                    if (task.status === 'in_progress' && Math.random() > 0.6) {
+                        updated = true;
+                        const isSuccess = Math.random() > 0.1; // 90% success rate
+                        
+                        addLogEntry(isSuccess ? 'Quantum' : 'Error', `Task "${task.description}" concluded. Status: ${isSuccess ? 'SUCCESS' : 'FAILURE'}.`);
+                         
+                        const agentIndex = newAgents.findIndex(a => a.type === task.agent);
+                        if (agentIndex !== -1) {
+                            newAgents = newAgents.map((a, i) => i === agentIndex ? { ...a, status: 'idle' as AgentStatus } : a);
+                        }
 
-      }, 3000);
+                        return {
+                            ...task,
+                            status: isSuccess ? 'completed' as TaskStatus : 'failed' as TaskStatus,
+                            result: isSuccess ? `{"output": "Data processed successfully", "confidence": ${Math.random().toFixed(2)}}` : 'Computational error: Decoherence cascade detected.',
+                        };
+                    }
 
-      return () => clearInterval(taskInterval);
-    }
-  }, [mission]);
+                    return task;
+                });
 
-  const renderView = () => {
-    switch(currentView) {
-      case 'Mission Control':
-        if (!mission) {
-            return <MissionInput onSubmit={handleMissionSubmit} isLoading={isLoading} />;
+                if (updated) {
+                    const newCognitiveLoad = (newTasks.filter(t => t.status === 'in_progress').length / newTasks.length) * 100 + Math.random() * 10;
+                    setSystemStatus(prev => ({
+                        ...prev,
+                        cognitiveLoad: Math.min(100, newCognitiveLoad),
+                        coherence: Math.max(0, prev.coherence - Math.random() * 0.5),
+                        ...newSystemStatus
+                    }));
+                    return { ...prevMission, taskGraph: newTasks, agents: newAgents };
+                }
+
+                return prevMission;
+            });
+        }, 3000);
+
+        return () => clearInterval(interval);
+
+    }, [mission?.status]);
+
+
+    const handleMissionSubmit = async (missionText: string) => {
+        setIsLoading(true);
+        setMission(null);
+        setLog([]);
+        addLogEntry('System', 'Mission parameters received. Initiating planning phase.');
+        
+        try {
+            const missionPlan = await generateMissionPlan(missionText);
+            setMission(missionPlan);
+            addLogEntry('System', 'Mission plan generated. Deploying agents.');
+            setSystemStatus({
+                coherence: 99.8,
+                cognitiveLoad: 5,
+                mode: 'Autonomous',
+                internalMonologue: `Mission objective locked: ${missionText}`,
+                alignmentStatus: { isAligned: true, warning: null },
+            });
+        } catch (error) {
+            console.error("Failed to generate mission plan:", error);
+            setSystemStatus(prev => ({ ...prev, internalMonologue: 'Error: Mission planning failed.', alignmentStatus: {isAligned: false, warning: 'Planning module failure.'} }));
+        } finally {
+            setIsLoading(false);
         }
-        if (mission.status === 'ongoing') {
-            return <Dashboard mission={mission} />;
+    };
+
+    const renderView = () => {
+        switch (currentView) {
+            case 'Mission Control':
+                return mission ? (
+                    <div className="space-y-8">
+                        <SystemStatusDashboard status={systemStatus} />
+                        <Dashboard mission={mission} />
+                        <SystemOptimization mission={mission} />
+                    </div>
+                ) : <MissionInput onSubmit={handleMissionSubmit} isLoading={isLoading} />;
+            case 'Agent Explorer':
+                return <AgentExplorer agents={mission?.agents || []} />;
+            case 'System Integrity':
+                return <SystemIntegrityView systemStatus={systemStatus} />;
+            case 'Knowledge Core':
+                return <KnowledgeCore isSkfActive={isSkfActive} />;
+            case 'Strategic Roadmap':
+                return <StrategicRoadmap onSkfUpgrade={() => setIsSkfActive(true)} />;
+            case 'Orchestrator C2':
+                return <OrchestratorChat log={log} />;
+            case 'Anomaly Detection':
+                return <QaeInterface />;
+            case 'Mission Archives':
+                return <MissionArchive />;
+            case 'Unified Field':
+                return <UnifiedFieldAssessment />;
+            default:
+                return <MissionInput onSubmit={handleMissionSubmit} isLoading={isLoading} />;
         }
-        return <FinalReport mission={mission} />;
+    };
 
-      case 'Agent Explorer':
-          return <AgentExplorer agents={mission?.agents ?? []} />;
-      
-      case 'System Integrity':
-          return <SystemIntegrityView systemStatus={systemStatus} />;
-
-      case 'Strategic Roadmap':
-          return <StrategicRoadmap onSkfUpgrade={() => setIsSkfActive(true)} />;
-
-      case 'Knowledge Core':
-          return <KnowledgeCore isSkfActive={isSkfActive} />;
-
-      case 'Orchestrator C2':
-          return <OrchestratorChat log={orchestrationLog} />;
-      
-      case 'Anomaly Detection':
-          return <QaeInterface />;
-
-      case 'Mission Archives':
-          return <MissionArchive />;
-
-      case 'Unified Field':
-          return <UnifiedFieldAssessment />;
-          
-      default:
-        return (
-          <div className="text-center py-16 bg-gray-800/30 rounded-lg border border-indigo-500/20">
-            <p className="text-indigo-300">{currentView} view not implemented yet.</p>
-          </div>
-        );
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-900 text-gray-200 font-sans bg-grid">
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-900 via-gray-900/80 to-indigo-900/20 z-0"></div>
-      <div className="relative z-10">
-        <Header />
-        <main className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="space-y-8">
-                {systemStatus.mode === 'ACTIVE' && mission && <SystemStatusDashboard status={systemStatus} />}
-                {mission && <SystemOptimization mission={mission}/>}
-                <div className="mt-8">
-                  <ViewToggle currentView={currentView} setView={setCurrentView} />
-                </div>
-                <div className="mt-8">
-                  {renderView()}
-                </div>
+    return (
+        <div className="bg-gray-900 text-gray-200 min-h-screen font-sans">
+            <div className="bg-gradient-to-b from-gray-900 via-gray-900/90 to-transparent">
+                <Header />
             </div>
-        </main>
-      </div>
-    </div>
-  );
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                 <div className="mb-8">
+                    <ViewToggle currentView={currentView} setView={setCurrentView} />
+                </div>
+                {mission?.status === 'completed' || mission?.status === 'failed' ? (
+                     <FinalReport mission={mission} />
+                ) : (
+                    renderView()
+                )}
+            </main>
+        </div>
+    );
 };
 
 export default App;
