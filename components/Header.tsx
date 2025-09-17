@@ -1,6 +1,5 @@
 
 import React from 'react';
-// FIX: Corrected import path for Icons component to be a relative path.
 import { NexusIcon } from './Icons';
 
 export const Header: React.FC = () => {

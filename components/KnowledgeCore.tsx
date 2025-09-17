@@ -1,42 +1,24 @@
-import React, { useState } from 'react';
-import { SkfUpgradeModule } from './SkfUpgradeModule';
+
+import React from 'react';
 import { KnowledgeBaseMonitor } from './KnowledgeBaseMonitor';
 import { CognitiveSynthesizer } from './CognitiveSynthesizer';
 import { GenerativeSimulationEngine } from './GenerativeSimulationEngine';
-import { SkfUpgradeResult } from '../types';
-import { runSkfUpgrade } from '../services/geminiService';
 
-export const KnowledgeCore: React.FC = () => {
-    const [skfResult, setSkfResult] = useState<SkfUpgradeResult | null>(null);
-    const [isSkfLoading, setIsSkfLoading] = useState(false);
-    const [isSkfUpgraded, setIsSkfUpgraded] = useState(false);
+interface KnowledgeCoreProps {
+    isSkfActive: boolean;
+}
 
-    const handleSkfUpgrade = async () => {
-        setIsSkfLoading(true);
-        setSkfResult(null);
-        try {
-            const res = await runSkfUpgrade();
-            setSkfResult(res);
-            setIsSkfUpgraded(true);
-        } catch (error) {
-            console.error("SKF upgrade failed:", error);
-        } finally {
-            setIsSkfLoading(false);
-        }
-    };
-
+export const KnowledgeCore: React.FC<KnowledgeCoreProps> = ({ isSkfActive }) => {
     return (
         <div className="space-y-12">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <KnowledgeBaseMonitor isSkfActive={isSkfUpgraded} />
-                <SkfUpgradeModule
-                    onInitiate={handleSkfUpgrade}
-                    result={skfResult}
-                    isLoading={isSkfLoading}
-                    isUpgraded={isSkfUpgraded}
-                />
+            <div className="text-center mb-10">
+                <h2 className="text-3xl font-bold text-indigo-300">Knowledge Core Interface</h2>
+                <p className="mt-2 text-lg text-indigo-200/80 max-w-3xl mx-auto">
+                    Manage, synthesize, and simulate data within the system's central knowledge repository.
+                </p>
             </div>
-            <CognitiveSynthesizer isSkfActive={isSkfUpgraded} />
+            <KnowledgeBaseMonitor isSkfActive={isSkfActive} />
+            <CognitiveSynthesizer />
             <GenerativeSimulationEngine />
         </div>
     );

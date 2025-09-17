@@ -1,6 +1,5 @@
 
 import React from 'react';
-// FIX: Corrected import paths for types and child components to be relative.
 import { TacticalPlan, TacticalStep, AgentType } from '../types';
 import { ScienceIcon, SocietyIcon, PlanetIcon } from './Icons';
 import { Spinner } from './Spinner';

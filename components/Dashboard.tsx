@@ -1,13 +1,10 @@
 
 import React, { useState } from 'react';
-// FIX: Corrected import path for types to be a relative path.
 import { Mission, StrategicAdvice } from '../types';
 import { AgentCard } from './AgentCard';
 import { TacticalPhase } from './TacticalPhase';
 import { StrategicAdvisoryModal } from './StrategicAdvisoryModal';
-// FIX: Corrected import path for Icons component to be a relative path.
 import { LightbulbIcon } from './Icons';
-// FIX: Corrected import path for geminiService to be a relative path.
 import { getStrategicAdvice } from '../services/geminiService';
 
 export const Dashboard: React.FC<{ mission: Mission }> = ({ mission }) => {

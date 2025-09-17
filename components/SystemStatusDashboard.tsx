@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-// FIX: Corrected import paths for types and Icons to be relative.
 import { SystemStatus } from '../types';
 import { AlertIcon } from './Icons';
 

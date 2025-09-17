@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-// FIX: Corrected import paths for types and child components to be relative.
 import { AgentType, StrategicAdvice } from '../types';
 import { Spinner } from './Spinner';
 import { ScienceIcon, SocietyIcon, PlanetIcon, LightbulbIcon } from './Icons';

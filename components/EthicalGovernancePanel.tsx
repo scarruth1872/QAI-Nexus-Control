@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-// FIX: Corrected import paths to be relative.
 import { ShieldIcon, AlertIcon } from './Icons';
 import { SystemStatus, EthicalAnalysis, XaiAnalysisResult } from '../types';
 import { Spinner } from './Spinner';

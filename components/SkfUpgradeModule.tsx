@@ -1,9 +1,7 @@
 
 import React from 'react';
-// FIX: Corrected import path for types to be a relative path.
 import { SkfUpgradeResult } from '../types';
 import { Spinner } from './Spinner';
-// FIX: Corrected import path for Icons to be a relative path.
 import { BrainCircuitIcon, CheckCircleIcon } from './Icons';
 
 interface SkfUpgradeModuleProps {

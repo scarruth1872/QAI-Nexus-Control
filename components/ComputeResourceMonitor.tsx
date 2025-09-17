@@ -1,93 +1,61 @@
 
-
 import React, { useState, useEffect } from 'react';
-// FIX: Corrected import path for Icons component to be a relative path.
 import { CpuIcon, QuantumCircuitIcon, BrainCircuitIcon } from './Icons';
 
-interface ComputeResourceMonitorProps {
-    isNcpIntegrated?: boolean;
-}
-
-interface ResourceBarProps {
+interface MetricProps {
+    Icon: React.FC<React.SVGProps<SVGSVGElement>>;
     label: string;
     value: number;
-    colorClass: string;
-    icon: React.ReactNode;
+    unit: string;
+    color: string;
 }
 
-const ResourceBar: React.FC<ResourceBarProps> = ({ label, value, colorClass, icon }) => (
-    <div className="flex items-center space-x-3">
-        <div className={`p-2 bg-gray-900/50 rounded-md border border-indigo-500/10 ${colorClass}`}>
-            {icon}
+const Metric: React.FC<MetricProps> = ({ Icon, label, value, unit, color }) => (
+    <div className={`bg-gray-800/50 border border-${color}-500/20 rounded-lg p-4 shadow-lg shadow-${color}-900/10 backdrop-blur-sm`}>
+        <div className="flex items-center">
+            <Icon className={`w-8 h-8 text-${color}-400 mr-4`} />
+            <div>
+                <h4 className="font-semibold text-base text-gray-200">{label}</h4>
+                <p className={`font-mono font-bold text-2xl text-${color}-300`}>{value.toFixed(1)} <span className="text-base font-sans text-gray-400">{unit}</span></p>
+            </div>
         </div>
-        <div className="flex-1">
-            <div className="flex justify-between items-baseline mb-1">
-                <span className="text-sm font-semibold text-indigo-200">{label}</span>
-                <span className={`font-mono font-semibold text-base ${colorClass}`}>{value.toFixed(1)}%</span>
-            </div>
-            <div className="w-full bg-gray-700/50 rounded-full h-2">
-                <div
-                    className={`h-2 rounded-full ${colorClass.replace('text-', 'bg-')}`}
-                    style={{ width: `${value}%`, transition: 'width 0.5s ease-in-out' }}
-                ></div>
-            </div>
+        <div className="w-full bg-gray-700/50 rounded-full h-1.5 mt-3">
+            <div
+                className={`h-1.5 rounded-full bg-gradient-to-r from-${color}-600 to-${color}-400`}
+                style={{ width: `${value}%`, transition: 'width 0.5s ease-in-out' }}
+            ></div>
         </div>
     </div>
 );
 
-const useFluctuatingValue = (base: number, range: number, interval: number) => {
-    const [value, setValue] = useState(base);
+
+export const ComputeResourceMonitor: React.FC = () => {
+    const [cpu, setCpu] = useState(35);
+    const [qpu, setQpu] = useState(60);
+    const [memory, setMemory] = useState(55);
 
     useEffect(() => {
-        const timer = setInterval(() => {
-            setValue(v => {
-                let newValue = v + (Math.random() - 0.5) * range;
-                return Math.max(0, Math.min(100, newValue));
-            });
-        }, interval);
+        const interval = setInterval(() => {
+            setCpu(prev => Math.max(10, Math.min(90, prev + (Math.random() - 0.5) * 10)));
+            setQpu(prev => Math.max(10, Math.min(90, prev + (Math.random() - 0.5) * 15)));
+            setMemory(prev => Math.max(10, Math.min(90, prev + (Math.random() - 0.5) * 5)));
+        }, 2000);
 
-        return () => clearInterval(timer);
-    }, [base, range, interval]);
+        return () => clearInterval(interval);
+    }, []);
 
-    return value;
-};
-
-
-export const ComputeResourceMonitor: React.FC<ComputeResourceMonitorProps> = ({ isNcpIntegrated = false }) => {
-    const classicalCpuBase = isNcpIntegrated ? 20 : 35;
-    const classicalCpu = useFluctuatingValue(classicalCpuBase, 10, 1500);
-    const quantumCore = useFluctuatingValue(60, 25, 2000);
-    const neuromorphicBase = isNcpIntegrated ? 45 : 15;
-    const neuromorphic = useFluctuatingValue(neuromorphicBase, isNcpIntegrated ? 20 : 5, 2500);
-    
     return (
         <div className="animate-fade-in-up">
             <div className="text-center mb-10">
                 <h2 className="text-3xl font-bold text-indigo-300">Compute Resource Monitor</h2>
                 <p className="mt-2 text-lg text-indigo-200/80 max-w-3xl mx-auto">
-                    Live telemetry from the Nexus computational substrates.
+                    Real-time telemetry from classical, quantum, and neuromorphic processing units.
                 </p>
             </div>
-
-            <div className="bg-gray-800/50 border border-indigo-500/20 rounded-lg p-6 backdrop-blur-sm shadow-lg shadow-indigo-900/20 space-y-6">
-                <ResourceBar
-                    label="Classical Substrate (CPU)"
-                    value={classicalCpu}
-                    colorClass="text-amber-400"
-                    icon={<CpuIcon className="w-6 h-6" />}
-                />
-                 <ResourceBar
-                    label="Quantum Core (QPU)"
-                    value={quantumCore}
-                    colorClass="text-cyan-400"
-                    icon={<QuantumCircuitIcon className="w-6 h-6" />}
-                />
-                 <ResourceBar
-                    label="Neuromorphic Co-Processor"
-                    value={neuromorphic}
-                    colorClass="text-rose-400"
-                    icon={<BrainCircuitIcon className="w-6 h-6" />}
-                />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Metric Icon={CpuIcon} label="Classical CPU Load" value={cpu} unit="%" color="amber" />
+                <Metric Icon={QuantumCircuitIcon} label="Quantum Processing Unit" value={qpu} unit="% Coherence" color="cyan" />
+                <Metric Icon={BrainCircuitIcon} label="Memory Fabric Usage" value={memory} unit="%" color="rose" />
             </div>
         </div>
     );

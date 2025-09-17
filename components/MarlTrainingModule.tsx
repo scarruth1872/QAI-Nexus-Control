@@ -1,9 +1,7 @@
 
 import React from 'react';
-// FIX: Corrected import path for types to be a relative path.
 import { MarlTrainingResult } from '../types';
 import { Spinner } from './Spinner';
-// FIX: Corrected import path for Icons to be a relative path.
 import { SocietyIcon, CheckCircleIcon } from './Icons';
 
 interface MarlTrainingModuleProps {

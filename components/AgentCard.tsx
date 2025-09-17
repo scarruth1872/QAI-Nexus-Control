@@ -1,6 +1,5 @@
 
 import React from 'react';
-// FIX: Corrected import paths for types and Icons to be relative.
 import { Agent, AgentType } from '../types';
 import { ScienceIcon, SocietyIcon, PlanetIcon } from './Icons';
 

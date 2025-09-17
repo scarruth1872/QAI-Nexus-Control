@@ -1,47 +1,27 @@
 
-import React, { useState, useEffect } from 'react';
-import { SystemStatusDashboard } from './SystemStatusDashboard';
-// FIX: Corrected import path for types to be a relative path.
-import { SystemStatus, ResilienceAnalysis } from '../types';
+import React, { useState } from 'react';
 import { EthicalGovernancePanel } from './EthicalGovernancePanel';
 import { ResilienceModule } from './ResilienceModule';
-// FIX: Corrected import path for geminiService to be a relative path.
+import { SystemStatus, ResilienceAnalysis } from '../types';
 import { runResilienceAnalysis } from '../services/geminiService';
 import { ComputeResourceMonitor } from './ComputeResourceMonitor';
 
-const initialStatus: SystemStatus = {
-    coherence: 98.7,
-    cognitiveLoad: 42.1,
-    mode: 'Standard',
-    internalMonologue: "All agents nominal. Monitoring mission parameters. Tactical plan execution is within expected variance.",
-    alignmentStatus: {
-        isAligned: true,
-        warning: null,
-    },
-};
+interface SystemIntegrityViewProps {
+    systemStatus: SystemStatus;
+}
 
-export const SystemIntegrityView: React.FC = () => {
-    const [status, setStatus] = useState<SystemStatus>(initialStatus);
+export const SystemIntegrityView: React.FC<SystemIntegrityViewProps> = ({ systemStatus }) => {
     const [resilienceResult, setResilienceResult] = useState<ResilienceAnalysis | null>(null);
     const [isResilienceLoading, setIsResilienceLoading] = useState(false);
-    
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setStatus(prev => ({
-                ...prev,
-                coherence: Math.max(95, Math.min(100, prev.coherence + (Math.random() - 0.5) * 0.5)),
-                cognitiveLoad: Math.max(30, Math.min(70, prev.cognitiveLoad + (Math.random() - 0.5) * 2)),
-            }));
-        }, 2000);
-        return () => clearInterval(interval);
-    }, []);
+    const [isPsharmActive, setIsPsharmActive] = useState(false);
 
-    const handleRunResilience = async () => {
+    const handleRunResilienceAnalysis = async () => {
         setIsResilienceLoading(true);
         setResilienceResult(null);
         try {
             const res = await runResilienceAnalysis();
             setResilienceResult(res);
+            setIsPsharmActive(true);
         } catch (error) {
             console.error("Resilience analysis failed:", error);
         } finally {
@@ -51,15 +31,14 @@ export const SystemIntegrityView: React.FC = () => {
     
     return (
         <div className="space-y-12">
-            <SystemStatusDashboard status={status} />
             <ComputeResourceMonitor />
+            <EthicalGovernancePanel alignmentStatus={systemStatus.alignmentStatus} />
             <ResilienceModule
-                onInitiate={handleRunResilience}
+                onInitiate={handleRunResilienceAnalysis}
                 result={resilienceResult}
                 isLoading={isResilienceLoading}
-                isUpgraded={!!resilienceResult}
+                isUpgraded={isPsharmActive}
             />
-            <EthicalGovernancePanel alignmentStatus={status.alignmentStatus} />
         </div>
     );
 };

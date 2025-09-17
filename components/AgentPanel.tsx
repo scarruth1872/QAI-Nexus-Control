@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Agent, AgentType } from '../types';
 import { ScienceIcon, SocietyIcon, PlanetIcon } from './Icons';

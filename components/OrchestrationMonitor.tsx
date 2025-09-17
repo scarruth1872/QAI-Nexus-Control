@@ -1,6 +1,5 @@
 
 import React from 'react';
-// FIX: Corrected import paths for types and Icons to be relative.
 import { OrchestrationLogEntry, LogEntryType } from '../types';
 import { CpuIcon, QuantumCircuitIcon, OptimizationIcon, NexusIcon, AlertIcon } from './Icons';
 
