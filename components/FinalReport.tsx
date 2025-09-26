@@ -1,30 +1,32 @@
+// Fix: Replaced placeholder content with a valid React component.
 import React from 'react';
-import { Mission } from '../types';
+// Fix: Corrected import path for types.
+import { FinalReportData } from '../types';
 
 interface FinalReportProps {
-    mission: Mission;
+  report: FinalReportData;
 }
 
-export const FinalReport: React.FC<FinalReportProps> = ({ mission }) => {
-    const completedTasks = mission.taskGraph.filter(task => task.status === 'completed').length;
-    const totalTasks = mission.taskGraph.length;
-
-    return (
-        <div className="animate-fade-in-up bg-gray-800/50 border border-indigo-500/20 rounded-lg p-6 backdrop-blur-sm shadow-lg shadow-indigo-900/20">
-            <div className="text-center mb-6">
-                <h2 className="text-3xl font-bold text-indigo-300">Mission Final Report</h2>
-                <p className="mt-2 text-lg text-indigo-200/80 max-w-3xl mx-auto">
-                    Objective: {mission.objective}
-                </p>
-                <p className={`mt-2 text-lg font-bold ${mission.status === 'completed' ? 'text-green-400' : 'text-rose-400'}`}>
-                    Status: {mission.status.toUpperCase()}
-                </p>
-            </div>
-            <div>
-                <h3 className="text-xl font-semibold text-indigo-300 border-b-2 border-indigo-500/30 pb-2 mb-4">Summary</h3>
-                <p className="text-indigo-100">The mission concluded with {completedTasks} out of {totalTasks} tactical steps successfully executed.</p>
-                {/* A more detailed summary could be generated here */}
-            </div>
-        </div>
-    );
+const FinalReport: React.FC<FinalReportProps> = ({ report }) => {
+  return (
+    <div className="module-panel">
+      <h3>Mission Final Report</h3>
+      <h4>Summary</h4>
+      <p>{report.summary}</p>
+      <h4>Outcomes</h4>
+      <ul>
+        {report.outcomes.map((outcome, index) => (
+          <li key={index}>{outcome}</li>
+        ))}
+      </ul>
+      <h4>Recommendations</h4>
+      <ul>
+        {report.recommendations.map((rec, index) => (
+          <li key={index}>{rec}</li>
+        ))}
+      </ul>
+    </div>
+  );
 };
+
+export default FinalReport;

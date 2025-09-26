@@ -1,5 +1,7 @@
 {
   "name": "Nexus Project Agent System",
   "description": "A web application that simulates the Nexus Project, a quantum-inspired multi-agent AI system. Users can input a high-level mission, and the AI Orchestrator will generate a strategic plan, decomposing the mission into tasks and assigning them to specialized agents.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }

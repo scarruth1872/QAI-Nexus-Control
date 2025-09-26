@@ -1,87 +1,41 @@
-
+// Fix: Replaced placeholder content with a valid React component.
 import React, { useState } from 'react';
-import { Mission, StrategicAdvice } from '../types';
-import { AgentCard } from './AgentCard';
-import { TacticalPhase } from './TacticalPhase';
-import { StrategicAdvisoryModal } from './StrategicAdvisoryModal';
-import { LightbulbIcon } from './Icons';
-import { getStrategicAdvice } from '../services/geminiService';
+import AgentExplorer from './AgentExplorer';
+import SystemStatusDashboard from './SystemStatusDashboard';
+import OrchestrationMonitor from './OrchestrationMonitor';
+import MissionInput from './MissionInput';
+// Fix: Corrected import path for types.
+import { Agent, SystemStatus, Mission } from '../types';
 
-export const Dashboard: React.FC<{ mission: Mission }> = ({ mission }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isAdvisoryLoading, setIsAdvisoryLoading] = useState(false);
-    const [advice, setAdvice] = useState<StrategicAdvice | null>(null);
+interface DashboardProps {
+    agents: Agent[];
+    systemStatus: SystemStatus;
+    onInitiateMission: (objective: string) => void;
+    isMissionLoading: boolean;
+    mission: Mission | null;
+}
 
-
-    const handleAdvisorySubmit = async (query: string) => {
-        setIsAdvisoryLoading(true);
-        setAdvice(null);
-        try {
-            const result = await getStrategicAdvice(query);
-            setAdvice(result);
-        } catch (error) {
-            console.error("Failed to get strategic advice:", error);
-            // Here you could set an error state to show in the modal
-        } finally {
-            setIsAdvisoryLoading(false);
-        }
-    };
-
-    const openModal = () => {
-        setAdvice(null);
-        setIsModalOpen(true);
-    };
-
-
+const Dashboard: React.FC<DashboardProps> = ({ agents, systemStatus, onInitiateMission, isMissionLoading, mission }) => {
+    // FIX: Added state for selected agent to satisfy AgentExplorer props.
+    const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
     return (
-        <div className="animate-fade-in-up">
-            <div className="text-center mb-10">
-                <h2 className="text-3xl font-bold text-indigo-300">Mission Dashboard</h2>
-                <p className="mt-2 text-lg text-indigo-200/80 max-w-3xl mx-auto">
-                    Objective: {mission.objective}
-                </p>
+        <div className="dashboard-grid">
+            <div className="grid-item mission-control">
+                <h3>Mission Control</h3>
+                <MissionInput onSubmit={onInitiateMission} isLoading={isMissionLoading} />
             </div>
-
-            <div className="flex justify-center mb-8">
-                <button
-                    onClick={openModal}
-                    className="inline-flex items-center justify-center px-6 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-indigo-500/50 hover:bg-indigo-500/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 transition-all duration-300"
-                >
-                    <LightbulbIcon className="w-5 h-5 mr-2" />
-                    Consult Strategic Advisory
-                </button>
+            <div className="grid-item agent-explorer-container">
+                 {/* FIX: Passed missing props to AgentExplorer component. */}
+                <AgentExplorer agents={agents} isLoading={isMissionLoading} onSelectAgent={setSelectedAgentId} selectedAgentId={selectedAgentId} />
             </div>
-
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Agent Status */}
-                <div className="lg:col-span-1 space-y-4">
-                     <h3 className="text-xl font-semibold text-indigo-300 border-b-2 border-indigo-500/30 pb-2">Active Agents</h3>
-                    {mission.agents.map(agent => (
-                        <AgentCard key={agent.id} agent={agent} />
-                    ))}
-                </div>
-
-                {/* Tactical Plan */}
-                <div className="lg:col-span-2 space-y-6">
-                     <h3 className="text-xl font-semibold text-indigo-300 border-b-2 border-indigo-500/30 pb-2">Tactical Execution</h3>
-                    {mission.tacticalPlans.map((plan, index) => {
-                        // We need to pass the updated steps from the flat taskGraph
-                        const phaseSteps = mission.taskGraph.filter(task => {
-                             const planStep = plan.steps.find(s => s.description === task.description && s.agent === task.agent);
-                             return !!planStep;
-                        });
-                        const updatedPlan = { ...plan, steps: phaseSteps };
-                        return <TacticalPhase key={index} phase={updatedPlan} />
-                    })}
-                </div>
+            <div className="grid-item system-status-container">
+                <SystemStatusDashboard status={systemStatus} />
             </div>
-             <StrategicAdvisoryModal 
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSubmit={handleAdvisorySubmit}
-                isLoading={isAdvisoryLoading}
-                advice={advice}
-            />
+            <div className="grid-item orchestration-monitor-container">
+                <OrchestrationMonitor mission={mission} agents={agents} />
+            </div>
         </div>
     );
 };
+
+export default Dashboard;

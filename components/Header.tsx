@@ -1,16 +1,16 @@
-
+// Fix: Replaced placeholder content with a valid React component.
 import React from 'react';
-import { NexusIcon } from './Icons';
 
-export const Header: React.FC = () => {
+const Header = () => {
   return (
-    <header className="py-4">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        <NexusIcon className="w-10 h-10 text-indigo-400" />
-        <h1 className="ml-4 text-3xl font-bold tracking-tighter text-gray-100">
-          QAI Nexus Control
-        </h1>
+    <header className="lcars-header">
+      <div className="lcars-header-text">A.I. COMMAND INTERFACE</div>
+      <div className="lcars-header-info">
+        <span>STATUS: NOMINAL</span>
+        <span>MISSION CLOCK: 42.0.1</span>
       </div>
     </header>
   );
 };
+
+export default Header;

@@ -1,51 +1,103 @@
-
-import React, { useState } from 'react';
-import { Spinner } from './Spinner';
+// Fix: Replaced placeholder content with a valid React component.
+import React, { useState, useRef, useEffect } from 'react';
+// Fix: Corrected import path for Icons.
+import { MicrophoneIcon, StopCircleIcon } from './Icons';
 
 interface MissionInputProps {
-  onSubmit: (missionText: string) => void;
+  onSubmit: (objective: string) => void;
   isLoading: boolean;
 }
 
-export const MissionInput: React.FC<MissionInputProps> = ({ onSubmit, isLoading }) => {
-  const [missionText, setMissionText] = useState('');
+const MissionInput: React.FC<MissionInputProps> = ({ onSubmit, isLoading }) => {
+  const [objective, setObjective] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    // Fix: Cast window to `any` to access browser-specific SpeechRecognition APIs.
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      const recognition = recognitionRef.current;
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onresult = (event: any) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+        // For this simple case, we'll just append the final transcript
+        if (finalTranscript) {
+          setObjective(prev => (prev ? prev + ' ' : '') + finalTranscript.trim());
+        }
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
+  const handleVoiceInput = () => {
+    if (!recognitionRef.current) {
+      alert("Voice recognition is not supported by your browser.");
+      return;
+    }
+    if (isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    } else {
+      recognitionRef.current.start();
+      setIsRecording(true);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(missionText);
+    if (objective.trim() && !isLoading) {
+      onSubmit(objective.trim());
+      setObjective('');
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-      <div className="bg-gray-800/50 border border-indigo-500/30 rounded-lg p-4 backdrop-blur-sm shadow-2xl shadow-indigo-500/10">
-        <label htmlFor="mission-input" className="block text-sm font-medium text-indigo-300 mb-2">
-          Define Grand Mission
-        </label>
-        <textarea
-          id="mission-input"
-          value={missionText}
-          onChange={(e) => setMissionText(e.target.value)}
-          placeholder="e.g., Develop a sustainable method for carbon capture to combat climate change."
-          className="w-full h-24 p-3 bg-gray-900/70 border border-indigo-700/50 rounded-md text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300 resize-none"
-          disabled={isLoading}
-        />
-      </div>
-      <div className="mt-6 flex justify-center">
-        <button
-          type="submit"
-          disabled={isLoading || !missionText.trim()}
-          className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-900/50 disabled:text-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105"
-        >
-          {isLoading ? (
-            <>
-              <Spinner className="w-5 h-5 mr-2" />
-              Deploying Agent...
-            </>
-          ) : (
-            'Deploy Nexus Agent'
-          )}
+    <form onSubmit={handleSubmit} className="mission-input-form">
+      <textarea
+        value={objective}
+        onChange={(e) => setObjective(e.target.value)}
+        placeholder="Enter mission objective..."
+        disabled={isLoading}
+      />
+      <div className="controls">
+        <button type="submit" disabled={isLoading || !objective.trim()}>
+          {isLoading ? 'Generating Plan...' : 'Initiate Mission'}
         </button>
+        {recognitionRef.current && (
+          <button
+            type="button"
+            onClick={handleVoiceInput}
+            className={`voice-btn ${isRecording ? 'recording' : ''}`}
+            title={isRecording ? 'Stop Recording' : 'Start Recording'}
+            disabled={isLoading}
+          >
+            {isRecording ? <StopCircleIcon /> : <MicrophoneIcon />}
+          </button>
+        )}
       </div>
     </form>
   );
 };
+
+export default MissionInput;

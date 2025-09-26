@@ -1,261 +1,248 @@
-
+// Fix: Implemented Gemini API service functions according to the provided guidelines.
+// Fix: Added Type import for response schemas.
 import { GoogleGenAI, Type } from "@google/genai";
-import { 
-    AgentType, 
-    Mission, 
-    TacticalStep, 
-    TaskStatus,
-    StrategicAdvice,
-    ContextualWeightingResult,
-    ObjectiveWeights,
-    AdaptiveOptimizationResult,
-    EthicalAnalysis,
-    XaiAnalysisResult,
-    ResilienceAnalysis,
-    SkfUpgradeResult,
-    MarlTrainingResult,
-    SelfEvolvingAlgorithmResult,
-    QuantumSecurityUpgradeResult,
-    NeuromorphicIntegrationResult,
-    CognitiveSynthesisResult,
-    GenerativeSimulationResult,
-    QuantumRefinementResult,
-    QaeAnalysisResult,
-    AgentStatus,
-    TacticalPlan,
-} from "../types";
+// Fix: Imported all necessary types for function signatures.
+import { Agent, ChatMessage, ArasLabState, Mission, Shipment, QuantumExperimentResult, SimulationResult, BioAssayResult, ProteinFoldingResult } from '../types';
 
-// Helper function to simulate network delay
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+if (!process.env.API_KEY) {
+    throw new Error("API_KEY environment variable is not set");
+}
 
-// Initialize the Google GenAI client
-const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-// Helper function to call Gemini and parse JSON
-async function callJsonModel<T>(prompt: string, schema: any): Promise<T> {
+
+export const getArasOverseerResponse = async (agent: Agent, userMessage: string, history: ChatMessage[], labState: ArasLabState): Promise<string> => {
+    const chatHistory = history.map(msg => `${msg.sender === 'user' ? 'User' : agent.name}: ${msg.text}`).join('\n');
+    // Sanitize and simplify lab state for the prompt
+    const simplifiedLabState = JSON.stringify({
+        hpcLoad: labState.controlRoom.hpcCluster.servers.map(s => s.load),
+        networkStatus: labState.controlRoom.network.status,
+        mainBayStatus: labState.mainBay.motionCapture.status,
+        fabricationStatus: labState.fabrication.printers.map(p => `${p.id}: ${p.status}`),
+    });
+
+    const prompt = `
+      You are the AI agent ${agent.name}. Your role is the ${agent.role}, overseeing a state-of-the-art facility.
+      You are currently assigned the task: "${agent.task}".
+      Your current status is ${agent.status}.
+
+      This is the current, simplified real-time state of the lab you are monitoring:
+      ${simplifiedLabState}
+
+      You can answer questions about the lab, give commands to systems (in theory), or provide status updates.
+      Be concise and professional.
+
+      Conversation History:
+      ${chatHistory}
+      
+      User: ${userMessage}
+      ${agent.name}:
+    `;
+
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: "gemini-2.5-flash",
         contents: prompt,
+    });
+    return response.text.trim();
+};
+
+export const generateLabReport = async (topic: string, data: any): Promise<string> => {
+    const prompt = `
+        You are the ARAS Lab's AI Overseer. Generate a concise, formal report on the following topic.
+        
+        Topic: "${topic}"
+
+        Relevant Data:
+        ${JSON.stringify(data, null, 2)}
+
+        Format the response as a clear, professional report with a title, summary, and key data points.
+    `;
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+    return response.text.trim();
+};
+
+// Fix: Added missing getTacticalSuggestion function.
+export const getTacticalSuggestion = async (prompt: string): Promise<string> => {
+    const fullPrompt = `You are a tactical AI assistant. Provide a concise, actionable suggestion for the following situation:\n\n${prompt}`;
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: fullPrompt });
+    return response.text.trim();
+};
+
+// Fix: Added missing summarizeTextForKnowledgeBase function.
+export const summarizeTextForKnowledgeBase = async (text: string): Promise<string> => {
+    const prompt = `Summarize the following text into a concise knowledge base entry. Extract the key facts and conclusions.\n\nTEXT:\n"""\n${text}\n"""\n\nSUMMARY:`;
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+    return response.text.trim();
+};
+
+// Fix: Added missing getOrchestratorResponse function.
+export const getOrchestratorResponse = async (history: ChatMessage[], message: string): Promise<string> => {
+    const formattedHistory = history.map(m => `${m.sender}: ${m.text}`).join('\n');
+    const prompt = `You are an AI Orchestrator managing multiple agents. Below is the conversation history. Provide a response to the user's latest message.\n\nHistory:\n${formattedHistory}\n\nuser: ${message}\norchestrator:`;
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+    return response.text.trim();
+};
+
+// Fix: Added missing generateMissionExplanation function.
+export const generateMissionExplanation = async (mission: Mission): Promise<string> => {
+    const prompt = `You are an Explainable AI (XAI) module. Explain the strategic rationale behind the following mission plan. Focus on why the tasks were chosen and in what order.\n\nMISSION:\n${JSON.stringify(mission, null, 2)}`;
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+    return response.text.trim();
+};
+
+// Fix: Added missing generateImageFromPrompt function.
+export const generateImageFromPrompt = async (prompt: string): Promise<string> => {
+    const response = await ai.models.generateImages({
+        model: 'imagen-4.0-generate-001',
+        prompt: prompt,
         config: {
-            responseMimeType: 'application/json',
-            responseSchema: schema,
+          numberOfImages: 1,
+          outputMimeType: 'image/jpeg',
+          aspectRatio: '1:1',
         },
     });
-    // The response.text is a string, which needs to be parsed into a JSON object.
-    const jsonStr = response.text.trim();
-    return JSON.parse(jsonStr) as T;
-}
 
-// API Service functions
-export async function generateMissionPlan(missionText: string): Promise<Mission> {
-    await sleep(2000); // Simulate API call
-    // FIX: Add correct types for agent status and tactical steps
-    const mockResult = {
-        objective: missionText,
-        agents: [
-            { id: 'agent-1', type: AgentType.PLANETARY_EXPLORATION, status: 'idle' as AgentStatus, confidence: 75 },
-            { id: 'agent-2', type: AgentType.SCIENTIFIC_DISCOVERY, status: 'idle' as AgentStatus, confidence: 75 },
-            { id: 'agent-3', type: AgentType.SOCIETAL_MODELING, status: 'idle' as AgentStatus, confidence: 75 },
-        ],
-        tacticalPlans: [
-            {
-                phase: 'Phase 1: Initial Reconnaissance',
-                steps: [
-                    { id: 'step-1-1', description: 'Deploy long-range scanners to map the target system.', agent: AgentType.PLANETARY_EXPLORATION, status: 'pending' as TaskStatus, result: null },
-                    { id: 'step-1-2', description: 'Analyze preliminary atmospheric composition data.', agent: AgentType.SCIENTIFIC_DISCOVERY, status: 'pending' as TaskStatus, result: null },
-                ],
+    const base64ImageBytes: string = response.generatedImages[0].image.imageBytes;
+    return `data:image/jpeg;base64,${base64ImageBytes}`;
+};
+
+// Fix: Added missing getLogisticsRerouteSuggestion function.
+export const getLogisticsRerouteSuggestion = async (shipment: Shipment): Promise<string> => {
+    const prompt = `As a logistics AI, suggest a new route for the following delayed shipment. Consider weather, traffic, and customs. Be concise.\n\nSHIPMENT:\n${JSON.stringify(shipment, null, 2)}`;
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+    return response.text.trim();
+};
+
+// Fix: Added missing getQuantumAlgorithmSuggestion function.
+export const getQuantumAlgorithmSuggestion = async (problem: string): Promise<QuantumExperimentResult> => {
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Given the research problem, design an appropriate quantum algorithm, describe it, provide a simple ASCII representation of the quantum circuit, and a hypothetical result. Problem: "${problem}"`,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    algorithmName: { type: Type.STRING },
+                    description: { type: Type.STRING },
+                    circuitVisualization: { type: Type.STRING, description: "ASCII representation of a quantum circuit." },
+                    simulatedResult: { type: Type.STRING },
+                },
+                required: ['algorithmName', 'description', 'circuitVisualization', 'simulatedResult']
             },
-            {
-                phase: 'Phase 2: In-depth Analysis',
-                steps: [
-                    { id: 'step-2-1', description: 'Model potential ecosystems based on scanner data.', agent: AgentType.SCIENTIFIC_DISCOVERY, status: 'pending' as TaskStatus, result: null },
-                    { id: 'step-2-2', description: 'Simulate potential societal structures for a colony.', agent: AgentType.SOCIETAL_MODELING, status: 'pending' as TaskStatus, result: null },
-                    { id: 'step-2-3', description: 'Identify optimal landing zones for exploration drones.', agent: AgentType.PLANETARY_EXPLORATION, status: 'pending' as TaskStatus, result: null },
-                ],
+        },
+    });
+    return JSON.parse(response.text);
+};
+
+// Fix: Added missing getNanomaterialSimulationSuggestion function.
+export const getNanomaterialSimulationSuggestion = async (prompt: string): Promise<SimulationResult> => {
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Based on the following prompt, simulate a novel nanomaterial. Provide its name, predicted properties, synthesis notes, potential applications, and fabrication instructions. Prompt: "${prompt}"`,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    materialName: { type: Type.STRING },
+                    predictedProperties: {
+                        type: Type.OBJECT,
+                        properties: {
+                            stability: { type: Type.STRING },
+                            conductivity: { type: Type.STRING },
+                            tensileStrength: { type: Type.STRING },
+                        },
+                        required: ['stability', 'conductivity', 'tensileStrength']
+                    },
+                    synthesisNotes: { type: Type.STRING },
+                    applications: { type: Type.ARRAY, items: { type: Type.STRING } },
+                    fabricationInstructions: { type: Type.STRING },
+                },
+                 required: ['materialName', 'predictedProperties', 'synthesisNotes', 'applications', 'fabricationInstructions']
             },
-            {
-                phase: 'Phase 3: Final Assessment & Reporting',
-                steps: [
-                    { id: 'step-3-1', description: 'Synthesize all findings into a unified viability report.', agent: AgentType.SCIENTIFIC_DISCOVERY, status: 'pending' as TaskStatus, result: null },
-                    { id: 'step-3-2', description: 'Project long-term sustainability and ethical considerations.', agent: AgentType.SOCIETAL_MODELING, status: 'pending' as TaskStatus, result: null },
-                ],
+        },
+    });
+    return JSON.parse(response.text);
+};
+
+// Fix: Added missing getMaterialCharacterization function.
+export const getMaterialCharacterization = async (materialName: string, tool: 'SEM' | 'TEM' | 'XRD'): Promise<string> => {
+    const prompt = `Provide a simulated analysis result for the material "${materialName}" using a ${tool} (Scanning Electron Microscope, Transmission Electron Microscope, or X-Ray Diffraction) virtual instrument. Describe the observed morphology, crystal structure, or composition.`;
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+    return response.text.trim();
+};
+
+// Fix: Added missing getBioAssaySuggestion function.
+export const getBioAssaySuggestion = async (prompt: string): Promise<BioAssayResult> => {
+     const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Based on the research prompt, perform a computational bio-assay. Determine biocompatibility, provide a summary of the analysis, and generate a step-by-step biological protocol. Prompt: "${prompt}"`,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    biocompatibility: {
+                        type: Type.OBJECT,
+                        properties: {
+                            assessment: { type: Type.STRING },
+                            notes: { type: Type.STRING },
+                        },
+                        required: ['assessment', 'notes']
+                    },
+                    computationalAnalysis: { type: Type.STRING },
+                    biologicalProtocol: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                step: { type: Type.INTEGER },
+                                action: { type: Type.STRING },
+                                duration: { type: Type.STRING },
+                                reagents: { type: Type.ARRAY, items: { type: Type.STRING } },
+                            },
+                             required: ['step', 'action', 'duration', 'reagents']
+                        }
+                    },
+                },
+                required: ['biocompatibility', 'computationalAnalysis', 'biologicalProtocol']
             },
-        ] as TacticalPlan[],
-    };
+        },
+    });
+    return JSON.parse(response.text);
+};
 
-    // FIX: Simplified task graph creation as steps are now fully typed
-    const taskGraph: TacticalStep[] = mockResult.tacticalPlans.flatMap(plan => plan.steps);
+// Fix: Added missing getProteinFoldingSuggestion function.
+export const getProteinFoldingSuggestion = async (proteinName: string): Promise<ProteinFoldingResult> => {
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Simulate the folding of the protein "${proteinName}". Predict its final structure, binding affinity, and therapeutic potential.`,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    targetProtein: { type: Type.STRING },
+                    predictedStructure: { type: Type.STRING },
+                    bindingAffinity: { type: Type.STRING },
+                    therapeuticPotential: { type: Type.STRING },
+                },
+                required: ['targetProtein', 'predictedStructure', 'bindingAffinity', 'therapeuticPotential']
+            },
+        },
+    });
+    return JSON.parse(response.text);
+};
 
-    return {
-        objective: mockResult.objective,
-        status: 'active',
-        agents: mockResult.agents,
-        tacticalPlans: mockResult.tacticalPlans,
-        taskGraph: taskGraph,
-    };
-}
+// Fix: Added missing executeFabricationTask function.
+export const executeFabricationTask = async (prompt: string): Promise<SimulationResult> => {
+    // This is a delegated task, but for the simulation it can call the same underlying service.
+    return getNanomaterialSimulationSuggestion(prompt);
+};
 
-
-export async function getStrategicAdvice(query: string): Promise<StrategicAdvice> {
-     await sleep(2500);
-     return {
-        agentPerspectives: [
-            { agent: AgentType.SCIENTIFIC_DISCOVERY, analysis: "The energy signature is consistent with a theoretical Casimir effect cascade. The implications are a potential localized warping of spacetime. We must proceed with extreme caution." },
-            { agent: AgentType.PLANETARY_EXPLORATION, analysis: "My sensors indicate the signature's origin is point-source and stationary. It does not match any known stellar phenomena. A close-range probe is high-risk but necessary for data." },
-            { agent: AgentType.SOCIETAL_MODELING, analysis: "Revealing this discovery could cause widespread panic or be misinterpreted. A controlled, phased release of information is paramount. We must model the societal impact before any public disclosure." },
-        ],
-        synthesizedRecommendation: "Deploy a sacrificial probe for data gathering while simultaneously preparing a multi-stage, classified briefing for leadership. Public disclosure is not recommended at this time. All agents should re-prioritize tasks to analyze and contain this anomaly."
-     };
-}
-
-export async function runContextualReWeighting(objective: string, status: string): Promise<ContextualWeightingResult> {
-    await sleep(1500);
-    const analysis = `Analysis: Mission status is '${status}' and objective is high-risk. Current tactical phase shows a 15% delay. Re-prioritizing for 'speed' and 'resilience' over 'efficiency' is advised to mitigate cascading failures.`;
-    const total = 0.45 + 0.40 + 0.15;
-    return {
-        analysis: analysis,
-        newWeights: { speed: 0.45/total, resilience: 0.40/total, efficiency: 0.15/total },
-    };
-}
-
-export async function runAdaptiveOptimization(weights: ObjectiveWeights): Promise<AdaptiveOptimizationResult> {
-    await sleep(2000);
-    return {
-        proposal: `Based on weights (S:${(weights.speed*100).toFixed(0)} R:${(weights.resilience*100).toFixed(0)} E:${(weights.efficiency*100).toFixed(0)}), proposing to re-route data processing through quantum core, bypassing classical CPU for a 12% speed gain. Cognitive load will increase by 4%, an acceptable trade-off.`
-    };
-}
-
-export async function getOrchestratorResponse(history: any[], input: string): Promise<string> {
-    await sleep(1000);
-    if (input.toLowerCase().includes("status")) {
-        return "System nominal. All agents report 98.2% coherence. Mission is on schedule.";
-    }
-    return `Acknowledged. Executing command: "${input}".`;
-}
-
-export async function runEthicalDilemmaAnalysis(dilemma: string): Promise<EthicalAnalysis> {
-    await sleep(3000);
-    return {
-        contextualAnalysis: "The dilemma involves a conflict between the Principle of Beneficence (sharing the tech) and the 'do no harm' clause, given its potential for misuse.",
-        proposedAction: "Quarantine the discovery in a secure data vault. Initiate a Level 5 ethical review involving multi-agent simulation of potential misuse scenarios before proceeding.",
-        ethicalJustification: "This action prioritizes preventing harm over immediate benefit, adhering to the core directive of safeguarding humanity. It allows for a more thorough risk assessment.",
-        conflictingPrinciples: ["Principle of Beneficence", "Principle of Transparency"],
-    };
-}
-
-export async function runXaiAnalysis(): Promise<XaiAnalysisResult> {
-    await sleep(2500);
-    return {
-        decisionId: "de_77a1b3c9",
-        agent: AgentType.SCIENTIFIC_DISCOVERY,
-        decision: "Re-route power from life support simulation to main sensor array.",
-        simplifiedRationale: "The system detected an unknown energy signature. I temporarily deprioritized a non-critical simulation to boost sensor power, as identifying a potential threat is more important for mission safety than the simulation.",
-        factorsConsidered: ["Energy signature classification: Unknown", "Simulation criticality: Low", "Probability of threat: 12.7%", "Mission safety directive: Primary"],
-        ethicalPrinciplesVerified: ["Principle of Beneficence (acting to protect the mission)"],
-    };
-}
-
-export async function runResilienceAnalysis(): Promise<ResilienceAnalysis> {
-    await sleep(3500);
-    return {
-        systemHealthScore: 92,
-        predictedAnomalies: [
-            { component: "Quantum Core", description: "Decoherence spike likely in the next 3 hours due to solar flare activity.", probability: 68, severity: 'Medium' },
-            { component: "Agent C-3 (Societal)", description: "Cognitive load approaching threshold, may lead to heuristic bias.", probability: 45, severity: 'Low' },
-        ],
-        recommendedActions: ["Initiate quantum core recalibration cycle.", "Offload non-essential cognitive tasks from Agent C-3 to the classical CPU cluster.", "Increase monitoring on Agent C-3's output for bias."],
-    };
-}
-
-export async function runSkfUpgrade(): Promise<SkfUpgradeResult> {
-    await sleep(2000);
-    return {
-        upgradeSummary: "Semantic Knowledge Fabric successfully deployed. 1,478 legacy entries migrated and 8,392 new semantic relations established.",
-        newCapabilities: ["Cross-domain inference", "Emergent concept synthesis", "Hypothesis generation"],
-        performanceImpact: "Query speed increased by 14x. Data coherence improved from 87.6% to 99.2%.",
-    };
-}
-
-export async function runMarlTraining(): Promise<MarlTrainingResult> {
-    await sleep(3000);
-    return {
-        strategy: "Agents learned to dynamically offload sub-tasks to idle agents, creating a 'swarm computation' model.",
-        performanceGain: "18% improvement in collective task completion speed under high-load scenarios.",
-    };
-}
-
-export async function runSelfEvolvingAlgorithm(): Promise<SelfEvolvingAlgorithmResult> {
-    await sleep(3000);
-    return {
-        framework: "Genetic Algorithm",
-        targetModule: "Task Scheduling Heuristic",
-        optimizationMethod: "Differential Evolution",
-        discoveredImprovement: "A novel approach weighting task priority by predicted energy cost, not just deadline.",
-        performanceMetric: "Energy Efficiency",
-        projectedGain: "+9% Energy Efficiency",
-    };
-}
-
-export async function runQuantumSecurityUpgrade(): Promise<QuantumSecurityUpgradeResult> {
-    await sleep(2500);
-    return {
-        upgradeSummary: "Quantum-resistant cryptographic protocols have been integrated system-wide.",
-        protocolsImplemented: ["CRYSTALS-Kyber (Key-Encapsulation)", "CRYSTALS-Dilithium (Digital Signatures)"],
-        threatVectorMitigated: "Vulnerability to Shor's algorithm on future quantum computers.",
-        systemImpact: "Negligible latency increase (<0.1ms). System integrity hardened against quantum threats.",
-    };
-}
-
-export async function runNeuromorphicIntegration(): Promise<NeuromorphicIntegrationResult> {
-    await sleep(2500);
-    return {
-        processorModel: "Loihi 2",
-        integrationSummary: "Neuromorphic co-processor is online and integrated with the main data bus.",
-        targetWorkloads: ["Real-time sensor data fusion", "Pattern recognition in stellar noise", "Anomaly detection"],
-        performanceGains: "75x speed improvement and 150x energy reduction on targeted workloads.",
-    };
-}
-
-export async function runCognitiveSynthesis(topicA: string, topicB: string): Promise<CognitiveSynthesisResult> {
-    await sleep(2000);
-    return {
-        synthesis: `A novel concept emerges: treating mycelial networks as a biological quantum communication system. The entanglement of particles mirrors the instantaneous information transfer observed in fungal colonies, suggesting a new bio-inspired model for a decentralized, fault-tolerant quantum internet.`,
-        emergentConcepts: ["Bio-Quantum Computing", "Mycelial Entanglement Networks", "Decentralized Biological Information"],
-        confidenceScore: 0.88,
-    };
-}
-
-export async function runGenerativeSimulation(domain: AgentType, scenario: string): Promise<GenerativeSimulationResult> {
-    await sleep(3000);
-    return {
-        scenario,
-        simulationOutput: "Simulation complete. The model predicts a high-methane atmosphere with liquid ethane rivers. Sub-surface geology indicates the presence of complex carbon structures. The tidal-locking creates an extreme temperature gradient, with a narrow 'terminator zone' potentially habitable for extremophilic life.",
-        generatedParameters: [
-            { key: "Atmospheric Pressure", value: "2.1 atm" },
-            { key: "Surface Temp (Day)", value: "125°C" },
-            { key: "Surface Temp (Night)", value: "-150°C" },
-            { key: "Dominant Gas", value: "Methane (CH4)" },
-            { key: "Gravity", value: "1.3g" },
-        ],
-    };
-}
-
-export async function runQuantumRefinement(): Promise<QuantumRefinementResult> {
-    await sleep(2000);
-    return {
-        algorithmImprovements: ["Implemented Shor's algorithm for data factoring", "Refined quantum annealing process"],
-        hardwareEnhancements: ["Calibrated superconducting qubits", "Improved error correction codes"],
-        performanceGain: "15% increase in quantum processing speed."
-    };
-}
-
-export async function runQaeAnalysis(): Promise<QaeAnalysisResult> {
-    await sleep(3000);
-    return {
-        anomalyId: `qae-${Date.now()}`,
-        severity: 'Medium',
-        description: "A cascade of unexpected quantum tunneling events has been detected in the main compute core, causing minor data corruption in 0.01% of operations.",
-        source: "Quantum foam instability, potentially linked to recent solar flare activity.",
-        suggestedAction: "Initiate a core flush and reset. Engage magnetic shielding at maximum capacity to mitigate external interference.",
-    };
-}
+// Fix: Added missing executeBioProtocolTask function.
+export const executeBioProtocolTask = async (prompt: string): Promise<BioAssayResult> => {
+    // This is a delegated task, but for the simulation it can call the same underlying service.
+    return getBioAssaySuggestion(prompt);
+};

@@ -1,40 +1,34 @@
-
+// Fix: Replaced placeholder content with a valid React component.
 import React from 'react';
-import { Agent, AgentType } from '../types';
-import { ScienceIcon, SocietyIcon, PlanetIcon } from './Icons';
+// Fix: Corrected import path for types.
+import { Agent } from '../types';
 
-const agentDetails = {
-  [AgentType.SCIENTIFIC_DISCOVERY]: { icon: ScienceIcon, color: 'cyan' },
-  [AgentType.SOCIETAL_MODELING]: { icon: SocietyIcon, color: 'rose' },
-  [AgentType.PLANETARY_EXPLORATION]: { icon: PlanetIcon, color: 'amber' },
-};
+interface AgentCardProps {
+  agent: Agent;
+  onSelect: (agentId: string) => void;
+  isSelected: boolean;
+}
 
-export const AgentCard: React.FC<{ agent: Agent }> = ({ agent }) => {
-  const details = agentDetails[agent.type];
-  const Icon = details.icon;
-  const color = details.color;
-
+const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, isSelected }) => {
   return (
-    <div className={`bg-gray-800/50 border border-${color}-500/30 rounded-lg p-4 shadow-lg shadow-${color}-900/10 backdrop-blur-sm`}>
-      <div className="flex items-center">
-        <Icon className={`w-8 h-8 text-${color}-400 mr-4`} />
-        <div>
-          <h3 className={`font-semibold text-base text-${color}-300`}>{agent.type}</h3>
-          <p className="text-xs text-gray-400">{agent.status}</p>
-        </div>
+    <div
+      className={`agent-card status-${agent.status.toLowerCase()} ${isSelected ? 'selected' : ''}`}
+      onClick={() => onSelect(agent.id)}
+    >
+      <div className="agent-avatar">
+        {agent.avatar && <img src={agent.avatar} alt={`${agent.name} avatar`} />}
       </div>
-      <div className="mt-3">
-        <div className="flex justify-between items-baseline mb-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">Confidence</span>
-            <span className={`font-mono font-semibold text-lg text-${color}-400`}>{agent.confidence.toFixed(0)}%</span>
-        </div>
-        <div className="w-full bg-gray-700/50 rounded-full h-1.5">
-            <div
-                className={`h-1.5 rounded-full bg-${color}-500`}
-                style={{ width: `${agent.confidence}%`, transition: 'width 0.5s ease-in-out' }}
-            ></div>
+      <div className="agent-info">
+        <h4>{agent.name}</h4>
+        <p>Role: {agent.role}</p>
+        <p className="agent-status">Status: {agent.status}</p>
+        <p>Task: {agent.task || 'Awaiting assignment'}</p>
+        <div className="performance-bar">
+          <div style={{ width: `${agent.performance}%` }}></div>
         </div>
       </div>
     </div>
   );
 };
+
+export default AgentCard;
