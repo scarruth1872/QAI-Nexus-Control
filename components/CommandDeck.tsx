@@ -1,68 +1,47 @@
-// Fix: Implemented the CommandDeck component as the main application view.
-import React from 'react';
-import AgentExplorer from './AgentExplorer';
-import SystemStatusDashboard from './SystemStatusDashboard';
-import OrchestrationMonitor from './OrchestrationMonitor';
-import MissionInput from './MissionInput';
-// Fix: Corrected import path for AgentPanel.
+import React, { useState } from 'react';
+import Dashboard from './Dashboard';
 import AgentPanel from './AgentPanel';
-import TacticalPhase from './TacticalPhase';
-// Fix: Corrected import path for types.
-import { Agent, SystemStatus, Mission, AgentChats } from '../types';
+import { Agent } from '../types';
+import { useAppState } from '../contexts/AppContext.tsx';
 
 interface CommandDeckProps {
-    agents: Agent[];
-    areAgentsLoading: boolean;
-    systemStatus: SystemStatus;
-    mission: Mission | null;
-    onInitiateMission: (objective: string) => void;
-    isMissionLoading: boolean;
-    selectedAgentId: string | null;
-    onSelectAgent: (id: string | null) => void;
-    agentChats: AgentChats;
-    onSendAgentMessage: (agentId: string, text: string) => void;
-    onShowSpecializedDashboard: (agentId: string) => void;
+    onOpenSpecializedDashboard: (agent: Agent) => void;
 }
 
-const CommandDeck: React.FC<CommandDeckProps> = ({ 
-    agents, areAgentsLoading, systemStatus, mission, onInitiateMission, isMissionLoading, 
-    selectedAgentId, onSelectAgent, agentChats, onSendAgentMessage, onShowSpecializedDashboard
-}) => {
+const CommandDeck: React.FC<CommandDeckProps> = ({ onOpenSpecializedDashboard }) => {
+    // FIX: Renamed `onSendMessage` to `handleSendMessage` to match the AppContext state.
+    const { agents, agentChats, handleSendMessage } = useAppState();
     
-    const selectedAgent = agents.find(agent => agent.id === selectedAgentId) || null;
-    const selectedAgentChatHistory = selectedAgentId ? agentChats[selectedAgentId] || [] : [];
+    // Initialize with the first non-ARAS agent
+    const [selectedAgent, setSelectedAgent] = useState<Agent | null>(agents.find(a => a.name !== 'ARAS') || null);
+    
+    const handleSelectAgent = (agentId: string | null) => {
+        const agent = agents.find(a => a.id === agentId) || null;
+        setSelectedAgent(agent);
+    };
 
     return (
         <div className="command-deck-grid">
-            <div className="mission-control-panel">
-                <div className="module-panel">
-                    <h3>Mission Control</h3>
-                    <MissionInput onSubmit={onInitiateMission} isLoading={isMissionLoading} />
-                </div>
-                <div className="module-panel">
-                   <TacticalPhase mission={mission} />
-                </div>
-            </div>
-
-            <div className="system-status-panel">
-                <SystemStatusDashboard status={systemStatus} />
-            </div>
-
-            <div className="agent-explorer-panel">
-                <AgentExplorer agents={agents} isLoading={areAgentsLoading} onSelectAgent={onSelectAgent} selectedAgentId={selectedAgentId} />
-            </div>
-
-            <div className="agent-details-panel">
-                <AgentPanel 
-                    agent={selectedAgent} 
-                    chatHistory={selectedAgentChatHistory} 
-                    onSendMessage={onSendAgentMessage}
-                    onShowSpecializedDashboard={onShowSpecializedDashboard}
+            <div className="dashboard-container">
+                <Dashboard 
+                    selectedAgentId={selectedAgent?.id || null}
+                    onSelectAgent={handleSelectAgent}
                 />
             </div>
-
-             <div className="orchestration-monitor-panel">
-                <OrchestrationMonitor mission={mission} agents={agents} />
+            <div className="agent-panel-container">
+                {selectedAgent ? (
+                    <AgentPanel 
+                        agent={selectedAgent}
+                        chatHistory={agentChats[selectedAgent.id] || []}
+                        onSendMessage={handleSendMessage}
+                        onOpenSpecializedDashboard={onOpenSpecializedDashboard}
+                    />
+                ) : (
+                    <div className="module-panel">
+                        <h3>No Agent Selected</h3>
+                        <p>Select an agent from the Agent Explorer to view details and communicate.</p>
+                    </div>
+                )}
             </div>
         </div>
     );

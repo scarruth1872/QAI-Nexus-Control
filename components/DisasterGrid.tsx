@@ -1,5 +1,5 @@
 import React from 'react';
-// Fix: Corrected import path for types.
+// FIX: Corrected import path for types to be a relative module path.
 import { GridCellState, MarlAgent, Civilian } from '../types';
 import GridCell from './GridCell';
 

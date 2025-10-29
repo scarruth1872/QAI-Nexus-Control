@@ -1,10 +1,12 @@
 import React from 'react';
+// FIX: Corrected import path for types to be a relative module path.
 import { OmicsData } from '../../types';
 
 const initialData: OmicsData[] = [
     { id: 'gen-001', type: 'Genomics', dataset: 'Human Genome Set 7B', status: 'Processed' },
     { id: 'prot-004', type: 'Proteomics', dataset: 'Plasma Protein Map 4F', status: 'Analyzing' },
-    { id: 'meta-002', type: 'Metabolomics', dataset: 'Cellular Respiration Pathways', status: 'Pending' },
+    // Fix: Changed status from 'Pending' to 'PENDING' to match the Status type.
+    { id: 'meta-002', type: 'Metabolomics', dataset: 'Cellular Respiration Pathways', status: 'PENDING' },
 ];
 
 const OmicsDataPlatforms: React.FC = () => {

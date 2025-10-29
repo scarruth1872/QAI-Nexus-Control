@@ -1,9 +1,12 @@
+// Fix: Implemented the Theta8Dashboard, a specialized view for the neuromorphic agent.
 import React from 'react';
+// FIX: Corrected import path for types to be a relative module path.
 import { Agent } from '../../types';
+import EventStreamVisualizer from './EventStreamVisualizer';
 import NeuromorphicHardwareMonitor from './NeuromorphicHardwareMonitor';
 import SnnModelManager from './SnnModelManager';
-import EventStreamVisualizer from './EventStreamVisualizer';
 import CognitiveTaskOffload from './CognitiveTaskOffload';
+
 
 interface Theta8DashboardProps {
     agent: Agent;
@@ -12,19 +15,24 @@ interface Theta8DashboardProps {
 
 const Theta8Dashboard: React.FC<Theta8DashboardProps> = ({ agent, onReturn }) => {
     return (
-        <>
+        <div className="h-full flex flex-col">
             <div className="flex justify-between items-center mb-4">
-                <h3>Neuromorphic Dashboard: {agent.name}</h3>
+                <h3>Neuromorphic Architect Dashboard: {agent.name}</h3>
                 <button onClick={onReturn}>Return to Comms</button>
             </div>
-
-            <div className="theta-dashboard">
-                <div className="theta-hardware"><NeuromorphicHardwareMonitor /></div>
-                <div className="theta-models"><SnnModelManager /></div>
-                <div className="theta-offload"><CognitiveTaskOffload /></div>
-                <div className="theta-visualizer"><EventStreamVisualizer /></div>
+            <div className="neuromorphic-dashboard-grid">
+                <div className="nm-visualizer">
+                    <EventStreamVisualizer />
+                </div>
+                <div className="nm-sidebar">
+                    <NeuromorphicHardwareMonitor />
+                    <SnnModelManager />
+                </div>
+                 <div className="nm-offload">
+                    <CognitiveTaskOffload />
+                </div>
             </div>
-        </>
+        </div>
     );
 };
 

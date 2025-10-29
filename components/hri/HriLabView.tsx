@@ -1,11 +1,10 @@
 import React from 'react';
-import { HriLabState } from '../../types';
+import { useAppState } from '../../contexts/AppContext.tsx';
 
-interface HriLabViewProps {
-    hriState: HriLabState;
-}
+const HriLabView: React.FC = () => {
+    const { arasLabState } = useAppState();
+    const hriState = arasLabState.hri;
 
-const HriLabView: React.FC<HriLabViewProps> = ({ hriState }) => {
     return (
         <div className="zonal-view-grid">
             <div className="module-panel">
@@ -16,7 +15,7 @@ const HriLabView: React.FC<HriLabViewProps> = ({ hriState }) => {
             <div className="module-panel">
                 <h3>Biometric Sensors</h3>
                 <p>System Status: {hriState.biometrics.status}</p>
-                 <button disabled={hriState.biometrics.status === 'Active'} className="mt-2">Activate</button>
+                 <button disabled={hriState.biometrics.status === 'ACTIVE'} className="mt-2">Activate</button>
             </div>
             <div className="module-panel">
                 <h3>User Session</h3>

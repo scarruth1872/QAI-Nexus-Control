@@ -1,7 +1,8 @@
 // Fix: Implemented the GridCell component to render cells in the disaster simulation.
 import React from 'react';
-// Fix: Corrected import paths for types and Icons.
+// FIX: Corrected import path for types to be a relative module path.
 import { GridCellState, MarlAgent, Civilian } from '../types';
+// FIX: Corrected import path for Icons to be a relative module path.
 import { FireExtinguisherIcon, HeartPulseIcon, UserIcon, WrenchIcon } from './Icons';
 
 interface GridCellProps {
@@ -21,7 +22,7 @@ const AgentIcon: React.FC<{type: MarlAgent['type']}> = ({ type }) => {
 
 const GridCell: React.FC<GridCellProps> = ({ cell, agent, civilian }) => {
     const cellClasses = `grid-cell cell-type-${cell.type.toLowerCase()}`;
-    const intensityStyle = cell.type === 'FIRE' ? { opacity: 0.2 + cell.intensity * 0.08 } : {};
+    const intensityStyle = cell.type === 'FIRE' ? { opacity: 0.2 + cell.intensity * 0.16 } : {};
 
     return (
         <div className={cellClasses} style={intensityStyle}>

@@ -1,5 +1,6 @@
 // Fix: Implemented the AtoiDecisionSupport component.
 import React, { useState } from 'react';
+// FIX: Corrected import path for types to be a relative module path.
 import { AtoiTelemetry } from '../../types';
 import Spinner from '../Spinner';
 

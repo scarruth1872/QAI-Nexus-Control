@@ -1,5 +1,4 @@
-// Fix: Implemented the AtoiViewport component.
-import React, { useState } from 'react';
+import React from 'react';
 import { AtoiUnit } from '../../types';
 
 interface AtoiViewportProps {
@@ -7,37 +6,25 @@ interface AtoiViewportProps {
 }
 
 const AtoiViewport: React.FC<AtoiViewportProps> = ({ units }) => {
-    const [hoveredUnit, setHoveredUnit] = useState<AtoiUnit | null>(null);
-
-    // Normalize coordinates to a 0-100 range for display
-    const latToY = (lat: number) => ((lat - 34.03) / 0.05) * 100;
-    const lngToX = (lng: number) => ((lng - -118.27) / 0.05) * 100;
+    // A simplified mercator-like projection for display
+    const lonToX = (lon: number) => ((lon + 118.3) / 0.1) * 100;
+    const latToY = (lat: number) => ((34.1 - lat) / 0.1) * 100;
 
     return (
-        <div className="module-panel atoi-module atoi-viewport-container">
+        <div className="module-panel atoi-module" style={{ height: '100%' }}>
             <h3>Tactical Viewport</h3>
-            <div className="atoi-map" onMouseLeave={() => setHoveredUnit(null)}>
+            <div className="atoi-map-container">
                 {units.map(unit => (
                     <div
                         key={unit.id}
-                        className={`atoi-unit-icon type-${unit.type.toLowerCase().replace(' ', '-')}`}
+                        className={`atoi-unit-icon ${unit.type.replace(' ', '-').toLowerCase()} status-${unit.status.toLowerCase()}`}
                         style={{
-                            left: `${lngToX(unit.position.lng)}%`,
+                            left: `${lonToX(unit.position.lng)}%`,
                             top: `${latToY(unit.position.lat)}%`,
                         }}
-                        onMouseEnter={() => setHoveredUnit(unit)}
+                        title={`${unit.id} (${unit.type}) - ${unit.status}`}
                     />
                 ))}
-                {hoveredUnit && (
-                    <div className="atoi-tooltip" style={{
-                        left: `${lngToX(hoveredUnit.position.lng)}%`,
-                        top: `${latToY(hoveredUnit.position.lat)}%`,
-                    }}>
-                        <strong>ID:</strong> {hoveredUnit.id} <br />
-                        <strong>Type:</strong> {hoveredUnit.type} <br />
-                        <strong>Status:</strong> {hoveredUnit.status}
-                    </div>
-                )}
             </div>
         </div>
     );

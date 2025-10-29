@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Spinner from '../Spinner';
 import { getNanomaterialSimulationSuggestion, getMaterialCharacterization } from '../../services/geminiService';
+// FIX: Corrected import path for types to be a relative module path.
 import { SimulationResult } from '../../types';
 
 interface VirtualLabProps {

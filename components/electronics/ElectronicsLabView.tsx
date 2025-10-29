@@ -1,11 +1,10 @@
 import React from 'react';
-import { ElectronicsLabState } from '../../types';
+import { useAppState } from '../../contexts/AppContext.tsx';
 
-interface ElectronicsLabViewProps {
-    electronicsState: ElectronicsLabState;
-}
+const ElectronicsLabView: React.FC = () => {
+    const { arasLabState } = useAppState();
+    const electronicsState = arasLabState.electronics;
 
-const ElectronicsLabView: React.FC<ElectronicsLabViewProps> = ({ electronicsState }) => {
     return (
         <div className="zonal-view-grid">
             <div className="module-panel">

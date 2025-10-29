@@ -1,21 +1,21 @@
 import React from 'react';
-import { Agent, ArasLabState, ChatMessage } from '../../types';
 import AgentPanel from '../AgentPanel';
 import VideoWall from './VideoWall';
 import HpcClusterMonitor from './HpcClusterMonitor';
 import DataStorageMonitor from './DataStorageMonitor';
 import NetworkCoreMonitor from './NetworkCoreMonitor';
 import PowerManagementPanel from './PowerManagementPanel';
+import { useAppState } from '../../contexts/AppContext.tsx';
 
-interface ControlRoomViewProps {
-    agent: Agent;
-    labState: ArasLabState;
-    chatHistory: ChatMessage[];
-    onSendMessage: (agentId: string, text: string) => void;
-    onGenerateReport: (topic: string, data: any) => void;
-}
+const ControlRoomView: React.FC = () => {
+    // FIX: Renamed `onSendMessage` to `handleSendMessage` to match the AppContext state.
+    const { agents, arasLabState, agentChats, handleSendMessage, handleGenerateLabReport } = useAppState();
+    const agent = agents.find(a => a.name === 'ARAS');
 
-const ControlRoomView: React.FC<ControlRoomViewProps> = ({ agent, labState, chatHistory, onSendMessage, onGenerateReport }) => {
+    if (!agent) {
+        return <div>ARAS Agent not found.</div>;
+    }
+
     return (
         <div className="control-room-grid">
             <div className="cr-videowall">
@@ -25,28 +25,28 @@ const ControlRoomView: React.FC<ControlRoomViewProps> = ({ agent, labState, chat
                  <h3>Systems Overview</h3>
                  <div className="systems-grid">
                     <HpcClusterMonitor 
-                        clusterState={labState.controlRoom.hpcCluster} 
-                        onGenerateReport={() => onGenerateReport("HPC Cluster Performance", labState.controlRoom.hpcCluster)}
+                        clusterState={arasLabState.controlRoom.hpcCluster} 
+                        onGenerateReport={() => handleGenerateLabReport("HPC Cluster Performance", arasLabState.controlRoom.hpcCluster)}
                     />
                     <DataStorageMonitor 
-                        storageState={labState.controlRoom.dataStorage}
-                        onGenerateReport={() => onGenerateReport("Data Storage Status", labState.controlRoom.dataStorage)}
+                        storageState={arasLabState.controlRoom.dataStorage}
+                        onGenerateReport={() => handleGenerateLabReport("Data Storage Status", arasLabState.controlRoom.dataStorage)}
                      />
                     <NetworkCoreMonitor 
-                        networkState={labState.controlRoom.network}
-                        onGenerateReport={() => onGenerateReport("Network Core Status", labState.controlRoom.network)}
+                        networkState={arasLabState.controlRoom.network}
+                        onGenerateReport={() => handleGenerateLabReport("Network Core Status", arasLabState.controlRoom.network)}
                     />
                     <PowerManagementPanel 
-                        powerState={labState.controlRoom.power} 
-                        onGenerateReport={() => onGenerateReport("Power System Integrity", labState.controlRoom.power)}
+                        powerState={arasLabState.controlRoom.power} 
+                        onGenerateReport={() => handleGenerateLabReport("Power System Integrity", arasLabState.controlRoom.power)}
                     />
                  </div>
             </div>
             <div className="cr-agent">
                 <AgentPanel 
                     agent={agent}
-                    chatHistory={chatHistory}
-                    onSendMessage={onSendMessage}
+                    chatHistory={agentChats['aras'] || []}
+                    onSendMessage={handleSendMessage}
                 />
             </div>
         </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// Fix: Corrected import path for types.
+// FIX: Corrected import path for types to be a relative module path.
 import { Shipment } from '../../types';
 
 interface ShipmentMapProps {

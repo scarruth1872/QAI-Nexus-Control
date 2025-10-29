@@ -1,9 +1,13 @@
 import React from 'react';
+// FIX: Corrected import path for types to be a relative module path.
 import { SmartContract } from '../../types';
 
 const contracts: SmartContract[] = [
+    // Fix: Changed status to 'Active' to match the type definition.
     { id: 'sc-001', name: 'EthicalGovernance', version: 'v2.1', status: 'Active', address: '0x12...aB56' },
+    // Fix: Changed status to 'Active' to match the type definition.
     { id: 'sc-002', name: 'ResourceAllocation', version: 'v1.5', status: 'Active', address: '0x78...dC90' },
+    // Fix: Changed status to 'Active' to match the type definition.
     { id: 'sc-003', name: 'DataProvenance', version: 'v3.0', status: 'Active', address: '0x34...eF12' },
     { id: 'sc-004', name: 'ResourceAllocation', version: 'v1.4', status: 'Deprecated', address: '0x90...gH34' },
 ];

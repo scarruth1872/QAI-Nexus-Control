@@ -1,24 +1,15 @@
 import React from 'react';
-import { SimulationEnvironment } from '../../types';
-import StatusIndicator from './ExecutionCommand'; // Repurposed to StatusIndicator
 
-interface SimulationStatusProps {
-    simulations: SimulationEnvironment[];
-}
-
-const SimulationStatus: React.FC<SimulationStatusProps> = ({ simulations }) => {
+const SimulationViewport: React.FC = () => {
     return (
-        <div>
-            {simulations.map(sim => (
-                <div key={sim.name} className="mb-2">
-                    <StatusIndicator status={sim.status} text={sim.name} />
-                    <div className="metrics-group">
-                        Fidelity: {sim.fidelity}% / Training Coverage: {sim.coverage}% / Deployment Validation: {sim.validation}%
-                    </div>
-                </div>
-            ))}
+        <div className="module-panel">
+            <h3>Simulation Viewport</h3>
+            <div className="simulation-viewport-placeholder">
+                <p>Digital twin of robotics bay is active.</p>
+                {/* 3D rendering would go here */}
+            </div>
         </div>
     );
 };
 
-export default SimulationStatus;
+export default SimulationViewport;

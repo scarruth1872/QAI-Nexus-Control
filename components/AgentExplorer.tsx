@@ -1,6 +1,6 @@
 // Fix: Replaced placeholder content with a valid React component.
 import React from 'react';
-// Fix: Corrected import path for types.
+// FIX: Corrected import path for types to be a relative module path.
 import { Agent } from '../types';
 import AgentCard from './AgentCard';
 import Spinner from './Spinner';
@@ -24,7 +24,7 @@ const AgentExplorer: React.FC<AgentExplorerProps> = ({ agents, isLoading, onSele
             <AgentCard
               key={agent.id}
               agent={agent}
-              onSelect={onSelectAgent}
+              onSelect={() => onSelectAgent(agent.id)}
               isSelected={agent.id === selectedAgentId}
             />
           ))}

@@ -1,6 +1,6 @@
 // Fix: Replaced placeholder content with a valid React component.
 import React, { useState, useEffect, useRef } from 'react';
-// Fix: Corrected import paths for types and services.
+// FIX: Corrected import path for types to be a relative module path.
 import { ChatMessage } from '../types';
 import { getOrchestratorResponse } from '../services/geminiService';
 import Spinner from './Spinner';
@@ -45,7 +45,7 @@ const OrchestratorChat: React.FC = () => {
             <div className="chat-messages">
                 {messages.map((msg, index) => (
                     <div key={index} className={`message ${msg.sender}`}>
-                        <p>{msg.text}</p>
+                        <p><strong>{msg.sender === 'user' ? 'You' : 'Orchestrator'}:</strong> {msg.text}</p>
                     </div>
                 ))}
                 {isLoading && <Spinner />}

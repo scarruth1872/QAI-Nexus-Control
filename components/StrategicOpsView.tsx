@@ -1,22 +1,21 @@
 import React from 'react';
 import StrategicRoadmap from './StrategicRoadmap';
 import DevelopmentPlanner from './DevelopmentPlanner';
+import XaiModule from './XaiModule';
 import MarlTrainingModule from './MarlTrainingModule';
-import MissionArchive from './MissionArchive';
-import DgmPanel from './DgmPanel';
+import { useAppState } from '../contexts/AppContext.tsx';
 import GenerativeSimulationWrapper from './GenerativeSimulationWrapper';
 
+
 const StrategicOpsView: React.FC = () => {
+    const { mission } = useAppState();
     return (
-        <div className="view-grid" style={{gridTemplateColumns: '1fr 1fr', gridTemplateRows: 'auto auto 1fr' }}>
-            <StrategicRoadmap />
-            <DevelopmentPlanner />
-            <div style={{gridColumn: '1 / -1'}}>
-              <MarlTrainingModule />
-            </div>
-            <GenerativeSimulationWrapper />
-            <MissionArchive />
-            <DgmPanel />
+        <div className="strategic-ops-grid">
+            <div className="span-2"><StrategicRoadmap /></div>
+            <div className="span-1"><DevelopmentPlanner /></div>
+            <div className="span-1"><XaiModule mission={mission} /></div>
+            <div className="span-2"><MarlTrainingModule /></div>
+            <div className="span-2"><GenerativeSimulationWrapper /></div>
         </div>
     );
 };

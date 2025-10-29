@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 // Fix: Corrected import paths for services and types.
 import { summarizeTextForKnowledgeBase, getTacticalSuggestion } from '../services/geminiService';
 import Spinner from './Spinner';
-import { AgentChats, ChatMessage } from '../types';
+// FIX: Corrected import path for types to be a relative module path.
+import { AgentChats } from '../types';
 
 interface KnowledgeCoreProps {
     agentChats: AgentChats;

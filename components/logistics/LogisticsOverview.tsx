@@ -1,7 +1,7 @@
 import React from 'react';
-// Fix: Corrected import path for types.
+// FIX: Corrected import path for types to be a relative module path.
 import { Warehouse } from '../../types';
-// Fix: Corrected import path for Icons.
+// FIX: Corrected import path for Icons to be a relative module path.
 import { TruckIcon, WarehouseIcon, ClipboardListIcon } from '../Icons';
 
 interface LogisticsOverviewProps {

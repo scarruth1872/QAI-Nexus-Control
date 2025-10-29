@@ -1,8 +1,9 @@
 // Fix: Implemented the MarlTrainingModule component with a disaster response simulation.
 import React, { useState, useEffect, useCallback } from 'react';
-// Fix: Corrected import paths for types and Icons.
+// FIX: Corrected import path for types to be a relative module path.
 import { GridCellState, MarlAgent, Civilian } from '../types';
 import DisasterGrid from './DisasterGrid';
+// FIX: Corrected import path for Icons to be a relative module path.
 import { FireExtinguisherIcon, HeartPulseIcon, UserIcon, WrenchIcon } from './Icons';
 
 const GRID_SIZE = 15;

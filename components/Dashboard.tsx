@@ -1,32 +1,38 @@
-// Fix: Replaced placeholder content with a valid React component.
-import React, { useState } from 'react';
+import React from 'react';
 import AgentExplorer from './AgentExplorer';
 import SystemStatusDashboard from './SystemStatusDashboard';
 import OrchestrationMonitor from './OrchestrationMonitor';
 import MissionInput from './MissionInput';
-// Fix: Corrected import path for types.
-import { Agent, SystemStatus, Mission } from '../types';
+import { useAppState } from '../contexts/AppContext.tsx';
 
 interface DashboardProps {
-    agents: Agent[];
-    systemStatus: SystemStatus;
-    onInitiateMission: (objective: string) => void;
-    isMissionLoading: boolean;
-    mission: Mission | null;
+    selectedAgentId: string | null;
+    onSelectAgent: (agentId: string | null) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ agents, systemStatus, onInitiateMission, isMissionLoading, mission }) => {
-    // FIX: Added state for selected agent to satisfy AgentExplorer props.
-    const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+const Dashboard: React.FC<DashboardProps> = ({ 
+    selectedAgentId,
+    onSelectAgent
+}) => {
+    // FIX: Renamed `onInitiateMission` to `handleInitiateMission` to match the AppContext state.
+    const { agents, systemStatus, handleInitiateMission, isMissionLoading, mission } = useAppState();
+    
+    // Filter out the ARAS agent from the main command deck explorer
+    const displayAgents = agents.filter(a => a.name !== 'ARAS');
+
     return (
         <div className="dashboard-grid">
             <div className="grid-item mission-control">
                 <h3>Mission Control</h3>
-                <MissionInput onSubmit={onInitiateMission} isLoading={isMissionLoading} />
+                <MissionInput onSubmit={handleInitiateMission} isLoading={isMissionLoading} />
             </div>
             <div className="grid-item agent-explorer-container">
-                 {/* FIX: Passed missing props to AgentExplorer component. */}
-                <AgentExplorer agents={agents} isLoading={isMissionLoading} onSelectAgent={setSelectedAgentId} selectedAgentId={selectedAgentId} />
+                <AgentExplorer 
+                    agents={displayAgents} 
+                    isLoading={isMissionLoading} 
+                    onSelectAgent={onSelectAgent} 
+                    selectedAgentId={selectedAgentId} 
+                />
             </div>
             <div className="grid-item system-status-container">
                 <SystemStatusDashboard status={systemStatus} />

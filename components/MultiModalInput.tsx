@@ -1,6 +1,6 @@
 // Fix: Replaced placeholder content with a valid React component.
 import React, { useState, useRef, useEffect } from 'react';
-// Fix: Corrected import path for Icons.
+// FIX: Corrected import path for Icons to be a relative module path.
 import { MicrophoneIcon, StopCircleIcon } from './Icons';
 
 interface MultiModalInputProps {
@@ -29,7 +29,8 @@ const MultiModalInput: React.FC<MultiModalInputProps> = ({ prompt, setPrompt, is
                     .join('');
 
                 if (finalTranscript) {
-                    setPrompt(prev => (prev ? prev + ' ' : '') + finalTranscript.trim());
+                    // Fix: Use the `prompt` prop to construct the new value to match the prop type.
+                    setPrompt((prompt ? prompt + ' ' : '') + finalTranscript.trim());
                 }
             };
 
@@ -42,7 +43,7 @@ const MultiModalInput: React.FC<MultiModalInputProps> = ({ prompt, setPrompt, is
                 recognitionRef.current.stop();
             }
         };
-    }, [setPrompt]);
+    }, [setPrompt, prompt]);
 
     const handleVoiceInput = () => {
         if (!recognitionRef.current) {

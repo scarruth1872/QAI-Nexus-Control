@@ -1,10 +1,13 @@
 import React from 'react';
-import { FabricationState } from '../../types';
 import PrinterBay from './PrinterBay';
 import CncAndLaserControl from './CncAndLaserControl';
 import MaterialInventory from './MaterialInventory';
+import { useAppState } from '../../contexts/AppContext.tsx';
 
-const FabricationWorkshopView: React.FC<{ fabState: FabricationState }> = ({ fabState }) => {
+const FabricationWorkshopView: React.FC = () => {
+    const { arasLabState } = useAppState();
+    const fabState = arasLabState.fabrication;
+
     return (
         <div className="fabrication-grid">
             <div className="fab-printers">

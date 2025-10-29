@@ -1,6 +1,6 @@
 // Fix: Implemented the OrchestrationMonitor component with placeholder content.
 import React from 'react';
-// Fix: Corrected import path for types.
+// FIX: Corrected import path for types to be a relative module path.
 import { Mission, Agent } from '../types';
 
 interface OrchestrationMonitorProps {

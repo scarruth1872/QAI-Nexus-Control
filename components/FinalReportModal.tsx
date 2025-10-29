@@ -1,6 +1,6 @@
 // Fix: Implemented the FinalReportModal component.
 import React from 'react';
-// Fix: Corrected import path for types.
+// FIX: Corrected import path for types to be a relative module path.
 import { FinalReportData } from '../types';
 
 interface FinalReportModalProps {

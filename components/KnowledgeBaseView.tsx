@@ -1,27 +1,20 @@
 import React from 'react';
 import KnowledgeCore from './KnowledgeCore';
-import ResearchModule from './ResearchModule';
-import XaiModule from './XaiModule';
-import InteractionLog from './InteractionLog';
 import KnowledgeBaseMonitor from './KnowledgeBaseMonitor';
-import EthicalGovernancePanel from './EthicalGovernancePanel';
-// Fix: Corrected import path for types.
-import { Mission, AgentChats } from '../types';
+import CosmicCalibrator from './CosmicCalibrator';
+import UnifiedFieldAssessment from './UnifiedFieldAssessment';
+import { useAppState } from '../contexts/AppContext.tsx';
 
-interface KnowledgeBaseViewProps {
-    mission: Mission | null;
-    agentChats: AgentChats;
-}
-
-const KnowledgeBaseView: React.FC<KnowledgeBaseViewProps> = ({ mission, agentChats }) => {
+const KnowledgeBaseView: React.FC = () => {
+    const { agentChats } = useAppState();
     return (
-        <div className="view-grid">
-            <KnowledgeCore agentChats={agentChats} />
-            <ResearchModule />
-            <XaiModule mission={mission} />
-            <InteractionLog />
-            <KnowledgeBaseMonitor />
-            <EthicalGovernancePanel />
+        <div className="knowledge-base-grid">
+            <div className="kb-main"><KnowledgeCore agentChats={agentChats} /></div>
+            <div className="kb-side">
+                <KnowledgeBaseMonitor />
+                <CosmicCalibrator />
+                <UnifiedFieldAssessment />
+            </div>
         </div>
     );
 };

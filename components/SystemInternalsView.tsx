@@ -1,40 +1,33 @@
+// Fix: Implemented the SystemInternalsView component as a composite dashboard.
 import React from 'react';
-import SystemOptimization from './SystemOptimization';
-import QuantumCoreTuning from './QuantumCoreTuning';
-import NeuromorphicProcessorModule from './NeuromorphicProcessorModule';
-import ResilienceModule from './ResilienceModule';
-import QuantumSecurityModule from './QuantumSecurityModule';
-import CognitiveSynthesizer from './CognitiveSynthesizer';
 import SystemIntegrityView from './SystemIntegrityView';
+import QuantumCoreTuning from './QuantumCoreTuning';
 import ComputeResourceMonitor from './ComputeResourceMonitor';
+import NeuromorphicProcessorModule from './NeuromorphicProcessorModule';
+import CognitiveSynthesizer from './CognitiveSynthesizer';
+import SkfUpgradeModule from './SkfUpgradeModule';
+import ResilienceModule from './ResilienceModule';
+import EthicalGovernancePanel from './EthicalGovernancePanel';
+import QuantumSecurityModule from './QuantumSecurityModule';
+import SelfEvolvingFramework from './SelfEvolvingFramework';
+import DgmPanel from './DgmPanel';
 import QaeInterface from './QaeInterface';
-import UnifiedFieldAssessment from './UnifiedFieldAssessment';
-import FabricatorModule from './FabricatorModule';
-import CosmicCalibrator from './CosmicCalibrator';
-import ControlConsole from './ControlConsole';
-// Fix: Corrected import path for types.
-import { Agent } from '../types';
 
-interface SystemInternalsViewProps {
-    agents: Agent[];
-}
-
-const SystemInternalsView: React.FC<SystemInternalsViewProps> = ({ agents }) => {
+const SystemInternalsView: React.FC = () => {
     return (
-        <div className="view-grid">
-            <SystemOptimization />
-            <QuantumCoreTuning />
-            <NeuromorphicProcessorModule />
-            <ResilienceModule />
-            <QuantumSecurityModule />
-            <CognitiveSynthesizer />
-            <SystemIntegrityView />
-            <ComputeResourceMonitor />
-            <QaeInterface />
-            <UnifiedFieldAssessment />
-            <FabricatorModule />
-            <CosmicCalibrator />
-            <ControlConsole agents={agents} />
+        <div className="system-internals-grid">
+            <div className="grid-item-wide"><SystemIntegrityView /></div>
+            <div className="grid-item"><QuantumCoreTuning /></div>
+            <div className="grid-item"><ComputeResourceMonitor /></div>
+            <div className="grid-item"><NeuromorphicProcessorModule /></div>
+            <div className="grid-item"><CognitiveSynthesizer /></div>
+            <div className="grid-item"><SkfUpgradeModule /></div>
+            <div className="grid-item"><ResilienceModule /></div>
+            <div className="grid-item"><EthicalGovernancePanel /></div>
+            <div className="grid-item"><QuantumSecurityModule /></div>
+            <div className="grid-item"><SelfEvolvingFramework /></div>
+            <div className="grid-item"><DgmPanel /></div>
+            <div className="grid-item"><QaeInterface /></div>
         </div>
     );
 };

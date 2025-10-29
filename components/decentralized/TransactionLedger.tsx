@@ -1,39 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { DltTransaction } from '../../types';
 
-const transactionTypes: DltTransaction['type'][] = ['Resource Allocation', 'Ethical Compliance', 'Data Provenance'];
-
-const createMockTransaction = (): DltTransaction => ({
-    id: `0x${[...Array(8)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')}...`,
-    timestamp: new Date().toLocaleTimeString(),
-    type: transactionTypes[Math.floor(Math.random() * transactionTypes.length)],
-    details: `Agent ${['Alpha-1', 'Gamma-3', 'Eta-7'][Math.floor(Math.random()*3)]} action recorded.`
-});
-
+const generateRandomTransaction = (id: number): DltTransaction => {
+    const types: DltTransaction['type'][] = ['Resource Allocation', 'Ethical Compliance', 'Data Provenance'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    return {
+        id: `tx-${Date.now()}-${id}`,
+        timestamp: new Date().toISOString(),
+        type,
+        details: `Tx Details for ${type} - Hash: ${Math.random().toString(36).substring(2, 15)}`
+    };
+};
 
 const TransactionLedger: React.FC = () => {
-    const [transactions, setTransactions] = useState<DltTransaction[]>([]);
+    const [transactions, setTransactions] = useState<DltTransaction[]>(() => 
+        [...Array(5)].map((_, i) => generateRandomTransaction(i))
+    );
 
     useEffect(() => {
-        const initialTxs = [...Array(10)].map(createMockTransaction);
-        setTransactions(initialTxs);
-
         const interval = setInterval(() => {
-            setTransactions(prev => [createMockTransaction(), ...prev.slice(0, 50)]);
-        }, 1500);
+            setTransactions(prev => [generateRandomTransaction(prev.length), ...prev.slice(0, 100)]);
+        }, 3000);
         return () => clearInterval(interval);
     }, []);
 
     return (
-        <div className="module-panel">
-            <h3>Immutable Transaction Ledger</h3>
-            <div className="transaction-feed">
-                {transactions.map((tx, index) => (
-                    <div key={tx.id + index} className={`transaction-item ${index === 0 ? 'new' : ''}`}>
-                        <span>{`[${tx.timestamp}] `}</span>
-                        <span style={{color: 'var(--lcars-primary)'}}>{`${tx.type}: `}</span>
-                        <span>{tx.details}</span>
-                        <span style={{color: 'var(--lcars-tertiary)', display: 'block'}}>{`TxID: ${tx.id}`}</span>
+        <div className="module-panel" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <h3>Live Transaction Ledger</h3>
+            <div className="transaction-ledger-feed">
+                {transactions.map(tx => (
+                    <div key={tx.id} className="tx-item">
+                        <span className="tx-time">[{new Date(tx.timestamp).toLocaleTimeString()}]</span>
+                        <span className="tx-type">{tx.type}</span>
+                        <span className="tx-details">{tx.details}</span>
                     </div>
                 ))}
             </div>

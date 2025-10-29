@@ -1,20 +1,15 @@
 import React from 'react';
-import { Sensor } from '../../types';
 
-interface SensorListProps {
-    sensors: Sensor[];
-}
-
-const SensorList: React.FC<SensorListProps> = ({ sensors }) => {
+const SensorFusionDisplay: React.FC = () => {
     return (
-        <ul>
-            {sensors.map(sensor => (
-                <li key={sensor.type} className="text-sm">
-                    <strong>[{sensor.type}]</strong> {sensor.model}: {sensor.description}
-                </li>
-            ))}
-        </ul>
+        <div className="module-panel">
+            <h3>Sensor Fusion</h3>
+            <div className="sensor-fusion-placeholder">
+                <p>Aggregating LiDAR, Depth, and RGB feeds...</p>
+                {/* Visual representation would go here */}
+            </div>
+        </div>
     );
 };
 
-export default SensorList;
+export default SensorFusionDisplay;

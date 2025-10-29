@@ -1,6 +1,6 @@
 // Fix: Replaced placeholder content with a valid React component.
 import React, { useState, useRef, useEffect } from 'react';
-// Fix: Corrected import path for Icons.
+// FIX: Corrected import path for Icons to be a relative module path.
 import { MicrophoneIcon, StopCircleIcon } from './Icons';
 
 interface MissionInputProps {

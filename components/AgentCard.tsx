@@ -1,6 +1,6 @@
 // Fix: Replaced placeholder content with a valid React component.
 import React from 'react';
-// Fix: Corrected import path for types.
+// FIX: Corrected import path for types to be a relative module path.
 import { Agent } from '../types';
 
 interface AgentCardProps {

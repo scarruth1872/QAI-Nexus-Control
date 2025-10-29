@@ -1,4 +1,5 @@
 import React from 'react';
+// FIX: Corrected import path for types to be a relative module path.
 import { Printer } from '../../types';
 
 interface PrinterBayProps {

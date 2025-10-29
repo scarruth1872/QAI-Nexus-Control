@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Spinner from '../Spinner';
 import { getBioAssaySuggestion, getProteinFoldingSuggestion } from '../../services/geminiService';
+// FIX: Corrected import path for types to be a relative module path.
 import { BioAssayResult, ProteinFoldingResult } from '../../types';
 import ProteinViewer3D from './ProteinViewer3D';
 
@@ -71,7 +72,7 @@ const ComputationalBiologyLab: React.FC = () => {
                         onChange={(e) => setGenePrompt(e.target.value)}
                         placeholder="e.g., Test biocompatibility of a new nanomaterial..."
                         disabled={isGeneLoading}
-                        style={{ minHeight: '80px' }}
+                        style={{ minHeight: '80px', width: '100%' }}
                     />
                     <button onClick={handleRunGeneAnalysis} disabled={isGeneLoading || !genePrompt.trim()}>
                         {isGeneLoading ? 'Analyzing...' : `Run Gene Analysis`}
@@ -114,6 +115,7 @@ const ComputationalBiologyLab: React.FC = () => {
                         onChange={(e) => setProteinPrompt(e.target.value)}
                         placeholder="Enter target protein name, e.g., Insulin Receptor..."
                         disabled={isProteinLoading}
+                        style={{ width: '100%' }}
                     />
                     <button onClick={handleRunProteinFolding} disabled={isProteinLoading || !proteinPrompt.trim()}>
                         {isProteinLoading ? 'Simulating...' : `Run Folding Simulation`}

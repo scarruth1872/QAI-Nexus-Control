@@ -1,6 +1,6 @@
 // Fix: Replaced placeholder content with a valid React component.
 import React, { useState } from 'react';
-// Fix: Corrected import paths for types and services.
+// FIX: Corrected import path for types to be a relative module path.
 import { Mission } from '../types';
 import { generateMissionExplanation } from '../services/geminiService';
 import Spinner from './Spinner';

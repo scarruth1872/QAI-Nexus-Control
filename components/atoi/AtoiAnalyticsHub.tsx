@@ -1,5 +1,6 @@
 // Fix: Implemented the AtoiAnalyticsHub component.
 import React from 'react';
+// FIX: Corrected import path for types to be a relative module path.
 import { AtoiUnit } from '../../types';
 
 interface AtoiAnalyticsHubProps {
@@ -7,7 +8,7 @@ interface AtoiAnalyticsHubProps {
 }
 
 const AtoiAnalyticsHub: React.FC<AtoiAnalyticsHubProps> = ({ units }) => {
-    const readyUnits = units.filter(u => u.status !== 'Damaged').length;
+    const readyUnits = units.filter(u => u.status !== 'MAINTENANCE').length;
     const unitReadiness = (readyUnits / units.length) * 100;
 
     return (

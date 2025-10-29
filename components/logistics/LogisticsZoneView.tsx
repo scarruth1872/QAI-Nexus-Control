@@ -1,11 +1,10 @@
 import React from 'react';
-import { LogisticsState } from '../../types';
+import { useAppState } from '../../contexts/AppContext.tsx';
 
-interface LogisticsZoneViewProps {
-    logisticsState: LogisticsState;
-}
+const LogisticsZoneView: React.FC = () => {
+    const { arasLabState } = useAppState();
+    const logisticsState = arasLabState.logistics;
 
-const LogisticsZoneView: React.FC<LogisticsZoneViewProps> = ({ logisticsState }) => {
     return (
         <div className="zonal-view-grid">
             <div className="module-panel">
